@@ -1,11 +1,17 @@
 ﻿const dotCount = 5000;
 let lastPos = new Float64Array(dotCount);
 let currentPos = new Float64Array(dotCount);
+const nextPos = new Float64Array(dotCount);
+
 const dt = 0.0005;
-const startG = new Float64Array(dotCount).fill(0);
+const startG = new Float64Array(dotCount);
 const c = 0.1;
-const r = c * dt / (1 / dotCount);
+const dx = 1 / (dotCount - 1);
+const r = c * dt / dx;
+
 const deltaH = 50;
+const stepsPerFrame = 100;
+
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
@@ -15,65 +21,75 @@ function drawCurrent() {
     ctx.clearRect(0, 0, w, h);
     ctx.fillStyle = 'blue';
     for (let i = 0; i < dotCount; i++) {
-        const x = (i / dotCount) * w;
+        const x = (i / (dotCount - 1)) * w;
         const y = (currentPos[i] / 100) * h;
         ctx.fillRect(x, y, 2, 2);
     }
 }
 
 function calculateNext() {
-    const nextPos = new Float64Array(dotCount);
-    for (let i = 0; i < dotCount; i++) {
-
-
-        nextPos[i] = 2 * currentPos[i] - lastPos[i] +
+    nextPos[0] = deltaH;
+    nextPos[dotCount - 1] = deltaH;
+    for (let i = 1; i < dotCount - 1; i++) {
+        nextPos[i] =
+            2 * currentPos[i] - lastPos[i] +
             (r * r) * (currentPos[i + 1] - 2 * currentPos[i] + currentPos[i - 1]);
-        if (i === 0 || i === dotCount - 1) nextPos[i] = deltaH;
     }
     lastPos.set(currentPos);
     currentPos.set(nextPos);
 }
 
-function waveStep(){
-    drawCurrent();
-    calculateNext();
+function waveStep() {
+    for (let s = 0; s < stepsPerFrame; s++) {
+        calculateNext();
+    }
 
+    drawCurrent();
     requestAnimationFrame(waveStep);
 }
 
-function fillInitLayer(){
-    for (let i = 0; i < dotCount; i++){
+function fillInitLayer() {
+    const mode = 16; // number of waves
+    const mode2 = Math.PI;
+    for (let i = 0; i < dotCount; i++) {
         const progress = i / (dotCount - 1);
-        const damping = Math.sin(progress * Math.PI);
-        lastPos[i] = deltaH + Math.sin(i * 0.1) * 5 * damping;
+        const amplitude = 10 * Math.sin(mode2 * Math.PI * progress); // for non-static waves my friend Mefodiy
+        const shape = amplitude * Math.sin(mode * Math.PI * progress);
+        lastPos[i] = deltaH + shape;
     }
+    lastPos[0] = deltaH;
+    lastPos[dotCount - 1] = deltaH;
 }
 
-function fillFirstLayer(){
-    for (let i = 0; i < dotCount; i++){
-        if (i === 0 || i === dotCount - 1){
-            currentPos[i] = deltaH;
-            continue;
-        }
-        currentPos[i] = lastPos[i] + dt * startG[i] +
+function fillFirstLayer() {
+    currentPos[0] = deltaH;
+    currentPos[dotCount - 1] = deltaH;
+
+    for (let i = 1; i < dotCount - 1; i++) {
+        currentPos[i] =
+            lastPos[i] +
+            dt * startG[i] +
             (r * r) / 2 * (lastPos[i + 1] - 2 * lastPos[i] + lastPos[i - 1]);
     }
 }
 
-function init(){
+function init() {
     fillInitLayer();
-    fillFirstLayer()
+    fillFirstLayer();
 }
 
-function resizeCanvas(){
+function resizeCanvas() {
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
+
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
 
-    ctx.scale(dpr, dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
-init();
 resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+init();
+drawCurrent();
 requestAnimationFrame(waveStep);
