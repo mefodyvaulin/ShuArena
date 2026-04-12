@@ -1,0 +1,16 @@
+﻿.wave {
+    position: relative;
+    width: 100%;
+    height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.wave-item {
+    margin: 0;
+    position: absolute;
+    background-color: blue;
+    border-radius: 100%;
+}
