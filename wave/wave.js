@@ -3,7 +3,7 @@ const dots = [];
 let lastPos = [];
 let currentPos = [];
 const dt = 0.005;
-const startG = new Array(dotCount).fill(0.01);
+const startG = new Array(dotCount).fill(0);
 const dotSize = 100 / dotCount;
 const c = 0.1;
 const r = c * dt / dotSize;
@@ -14,16 +14,19 @@ function init(){
 
 
     for (let i= 0; i < dotCount; i++){
+
         let dot = document.createElement("div");
         dots[i] = dot;
         dot.className = "wave-item";
         dot.style.left = `${i * dotSize}%`;
         dot.style.width = `${dotSize}%`;
         dot.style.height = `3px`;
-        const startPos = deltaH + Math.sin(i * dotSize) *3;
+        const startPos = deltaH + Math.sin(i * dotSize) * 3;
         dot.style.top = `${startPos}%`;
         lastPos[i] = startPos;
-
+        if (i === 0 || i === dotCount - 1){
+            lastPos[i] = deltaH;
+        }
         container.appendChild(dot)
     }
 
