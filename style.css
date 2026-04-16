@@ -113,4 +113,71 @@ p{
     overflow-y: auto;
     max-height: 85vh;
     margin-left: 0;
+    width:450px;
+    padding: 15px;
+}
+
+.field{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.field label {
+    font-size: 17px;
+    color: white;
+    font-family: 'Turret Road', sans-serif;
+}
+
+.field input[type="number"], .field select {
+    width: 140px;
+    padding: 7px 9px;
+    border-radius: 8px;
+    border: 1px solid blue;
+    background: rgb(28, 29, 32);
+    color: white;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.selector-title {
+    margin-bottom: 8px;
+    font-size: 17px;
+    color: white;
+}
+
+.selector-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.selector-buttons button {
+    flex: 1;
+}
+
+.selector-buttons button {
+    padding: 9px 12px;
+    border-radius: 9px;
+    border: none;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    background-color: gray;
+}
+
+.selector-buttons .active {
+    background-color: blue;
+}
+
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 10px 0;
+    font-size: 17px;
+    cursor: pointer;
+    color: white;
+    box-sizing: border-box;
 }
