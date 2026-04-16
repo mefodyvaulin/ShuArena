@@ -53,8 +53,8 @@ p{
 
 
 
-.simulation-header{
-    min-height: 100px;
+#simulation-header{
+    min-height: 70px;
     height: auto;
     display: flex;
     align-items: center;
@@ -65,7 +65,7 @@ p{
 
 .main-page-link{
     height: 70px;
-    width:70px;
+    width:90px;
 }
 
 .main-page-link .logo{
