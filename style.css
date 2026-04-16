@@ -61,6 +61,21 @@ p{
     justify-content: space-between;
     padding-left: 25px;
     padding-right: 25px;
+    position: fixed;
+    top:0;
+    right:8px;
+    left:8px;
+    background-color: rgb(28, 29, 32, 0.5);
+}
+
+.simulation-wrapper{
+    display: flex;
+    margin: 95px 0 0 0;
+}
+
+#simulation-content{
+    flex: 1;
+    background-color: white;
 }
 
 .main-page-link{
@@ -75,10 +90,6 @@ p{
 
 .simulation-title{
     text-align: center;
-}
-
-.simulation-settings-container{
-    position: relative;
 }
 
 .simulation-settings-button{
@@ -97,11 +108,9 @@ p{
     border-radius: 3px;
 }
 
-.simulation-settings-container .simulation-settings-panel{
-    position: absolute;
-    top: 60px;
-    right: -25px;
-    background-color: white;
-    border-radius: 15px;
+.simulation-settings-panel{
     display: none;
+    overflow-y: auto;
+    max-height: 85vh;
+    margin-left: 0;
 }
