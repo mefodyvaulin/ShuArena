@@ -3,8 +3,8 @@ let lastPos = new Float64Array(dotCount);
 let currentPos = new Float64Array(dotCount);
 const nextPos = new Float64Array(dotCount);
 
-const dt = 0.0005;
-const startG = new Float64Array(dotCount);
+const dt = 0.0001;
+const startG = new Float64Array(dotCount).fill(10);
 const c = 0.1;
 const dx = 1 / (dotCount - 1);
 const r = c * dt / dx;
@@ -48,12 +48,12 @@ function waveStep() {
     requestAnimationFrame(waveStep);
 }
 
-function fillInitLayer() {
-    const mode = 16; // number of waves
+function fillFormLayer() {
+    const mode = 16;
     const mode2 = Math.PI;
     for (let i = 0; i < dotCount; i++) {
         const progress = i / (dotCount - 1);
-        const amplitude = 10 * Math.sin(mode2 * Math.PI * progress); // for non-static waves my friend Mefodiy
+        const amplitude = 10 * Math.sin(mode2 * Math.PI * progress);
         const shape = amplitude * Math.sin(mode * Math.PI * progress);
         lastPos[i] = deltaH + shape;
     }
@@ -74,7 +74,7 @@ function fillFirstLayer() {
 }
 
 function init() {
-    fillInitLayer();
+    fillFormLayer();
     fillFirstLayer();
 }
 
