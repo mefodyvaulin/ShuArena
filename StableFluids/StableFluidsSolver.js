@@ -222,9 +222,9 @@ export class StableFluidsSolver {
         this.setBoundaryScalarOpen(div);
         this.setBoundaryScalarOpen(p);
 
-        for (let k = 0; k < this.params.pressureIters; k++) {
-            for (let j = 1; j <= this.H; j++) {
-                for (let i = 1; i <= this.W; i++) {
+        for (let k = 0; k < this.parameters.pressureIters; k++) {
+            for (let j = 1; j <= this.yPoints; j++) {
+                for (let i = 1; i <= this.xPoints; i++) {
                     const pointIndex = this.IX(i, j);
                     p[pointIndex] = 0.25 * (
                         p[pointIndex - 1] +
@@ -238,8 +238,8 @@ export class StableFluidsSolver {
             this.setBoundaryScalarOpen(p);
         }
 
-        for (let j = 1; j <= this.H; j++) {
-            for (let i = 1; i <= this.W; i++) {
+        for (let j = 1; j <= this.yPoints; j++) {
+            for (let i = 1; i <= this.xPoints; i++) {
                 const pointIndex = this.IX(i, j);
                 u[pointIndex] -= 0.5 * (p[pointIndex + 1] - p[pointIndex - 1]);
                 v[pointIndex] -= 0.5 * (p[pointIndex + this.offset] - p[pointIndex - this.offset]);
