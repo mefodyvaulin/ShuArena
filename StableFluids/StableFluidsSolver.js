@@ -249,6 +249,51 @@ export class StableFluidsSolver {
         this.setBoundaryVelocityOpen(u, v);
     }
 
+    BilinearInterpolation(arr, x, y) { // Bilinear Interpolation for calculating speed at previous position of particle
+        if ((x < 0.5 || x > this.xPoints + 0.5 || y < 0.5 || y > this.yPoints + 0.5)) {
+            return 0.0;
+        }
+
+        x = Math.max(0.5, Math.min(this.xPoints + 0.5, x));
+        y = Math.max(0.5, Math.min(this.yPoints + 0.5, y));
+
+        const i0 = Math.floor(x);
+        const i1 = Math.min(i0 + 1, this.xPoints + 1);
+        const j0 = Math.floor(y);
+        const j1 = Math.min(j0 + 1, this.yPoints + 1);
+
+        const s1 = x - i0;
+        const s0 = 1.0 - s1;
+        const t1 = y - j0;
+        const t0 = 1.0 - t1;
+
+        return (
+            s0 * (t0 * arr[this.IX(i0, j0)] + t1 * arr[this.IX(i0, j1)]) +
+            s1 * (t0 * arr[this.IX(i1, j0)] + t1 * arr[this.IX(i1, j1)])
+        );
+    }
+
+
+    advectVelocity(u, v, uPrev, vPrev, dt, dissipation) { /* advection step
+    moving particles according semi-lagrangian approach
+    new velocity field (r, t + dt) = old velocity field (r - u * dt, t)
+    */
+        this.setBoundaryVelocityOpen(uPrev, vPrev);
+
+        for (let j = 1; j <= this.yPoints; j++) {
+            for (let i = 1; i <= this.xPoints; i++) {
+                const id = this.IX(i, j);
+                const x = i - dt * uPrev[id];
+                const y = j - dt * vPrev[id];
+
+                u[id] = this.BilinearInterpolation(uPrev, x, y) * dissipation;
+                v[id] = this.BilinearInterpolation(vPrev, x, y) * dissipation;
+            }
+        }
+
+        this.setBoundaryVelocityOpen(u, v);
+    }
+
     step() { // the algorithm with advancing forward in time is here
         this.applyVorticity();
 
@@ -265,5 +310,21 @@ export class StableFluidsSolver {
         );
 
         this.project(this.u, this.v, this.p, this.div);
+
+        this.u0.set(this.u);
+        this.v0.set(this.v);
+        this.advectVelocity(
+            this.u,
+            this.v,
+            this.u0,
+            this.v0,
+            this.u0,
+            this.v0,
+            this.parameters.dt,
+            this.parameters.velocityDissipation
+        );
+
+        this.project(this.u, this.v, this.p, this.div);
+
     }
 }
