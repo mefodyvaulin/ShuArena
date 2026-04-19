@@ -41,13 +41,13 @@
     }
 
     smooth() {
-        this.lastPos =this. currentPos;
+        this.lastPos = this.currentPos;
         for (let i = 1; i < 1000; i++) {
             this.currentPos[0] = 0;
             this.currentPos[this.dotsCount - 1] = 0;
             for (let i = 1; i < this.dotsCount - 1; i++) {
                 this.lastPos[i] =
-                    2 * this.currentPos[i] - this.currentPos[i] +
+                    this.currentPos[i] +
                     (this.r * this.r) * (this.currentPos[i + 1] - 2 * this.currentPos[i] + this.currentPos[i - 1]);
             }
         }

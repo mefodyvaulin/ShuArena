@@ -41,7 +41,7 @@ class WaveSimulator{
             const mouseX = this.wave.dotsCount * (e.clientX - rect.left) / Drawer.canvas.clientWidth;
             const mouseY = (e.clientY - rect.top) / Drawer.canvas.clientHeight * 100 - Drawer.deltaH
             for (let i = 1; i < this.wave.dotsCount - 1; i++) {
-                if (Math.abs(i - mouseX) < 20 && Math.abs(this.wave.currentPos[i] - mouseY) < 10) {
+                if (Math.abs(i - mouseX) < 30 && Math.abs(this.wave.currentPos[i] - mouseY) < 30) {
                     this.wave.currentPos[i] = mouseY;
                 }
             }
