@@ -78,7 +78,24 @@ export class StableFluidsSolver {
         return i + this.offset * j;
     }
 
-    setBoundaryVelocityOpen(u, v) {
+    setBoundaryScalarOpen(field){ // boundary conditions for scalar fields
+        for (let i= 1; i <= this.xPoints; i++) {
+            field[this.IX(i, 0)] = field[this.IX(i, 1)];
+            field[this.IX(i, this.yPoints + 1)] = field[this.IX(i, this.yPoints)];
+        }
+
+        for (let j = 1; j <= this.yPoints; j++){
+            field[this.IX(0, j)] = field[this.IX(1, j)];
+            field[this.IX(this.xPoints + 1, j)] = field[this.IX(this.xPoints, j)];
+        }
+
+        field[this.IX(0, 0)] = 0.5 * (field[this.IX(1, 0)] + field[this.IX(0, 1)]);
+        field[this.IX(0, this.yPoints + 1)] = 0.5 * (field[this.IX(1, this.yPoints + 1)] + field[this.IX(0, this.yPoints)]);
+        field[this.IX(this.xPoints + 1, 0)] = 0.5 * (field[this.IX(this.xPoints, 0)] + field[this.IX(this.xPoints + 1, 1)]);
+        field[this.IX(this.xPoints + 1, this.yPoints + 1)] = 0.5 * (field[this.IX(this.xPoints, this.yPoints + 1)] + field[this.IX(this.xPoints + 1, this.yPoints)]);
+    }
+
+    setBoundaryVelocityOpen(u, v) { // Open boundary velocity fields, Neumann problem boundary conditions
         for (let i = 1; i <= this.xPoints; i++) {
             u[this.IX(i, 0)] = u[this.IX(i, 1)];
             v[this.IX(i, 0)] = Math.min(v[this.IX(i, 1)], 0.0);
@@ -108,8 +125,20 @@ export class StableFluidsSolver {
         v[this.IX(this.xPoints + 1, this.yPoints + 1)] = 0.5 * (v[this.IX(this.xPoints, this.yPoints + 1)] + v[this.IX(this.xPoints + 1, this.yPoints)]);
     }
 
-    computeCurl() {
+    computeCurl() { // curl is scalar field, curl = ∂v/∂x - ∂u/∂y
+        this.setBoundaryVelocityOpen(this.u, this.v);
 
+        for (let i = 1; i <= this.xPoints; i++) {
+            for (let j = 1; j <= this.yPoints; j++) {
+                const derivativePointIndex = this.IX(i, j);
+                this.curl[derivativePointIndex] = 0.5 * (
+                    (this.v[derivativePointIndex + 1] - this.v[derivativePointIndex - 1]) -
+                    (this.u[derivativePointIndex + this.offset] - this.u[derivativePointIndex - this.offset])
+                );
+            }
+        }
+
+        this.setBoundaryScalarOpen(this.curl);
     }
 
     applyVorticity() {
