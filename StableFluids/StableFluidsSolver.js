@@ -162,7 +162,59 @@ export class StableFluidsSolver {
             }
         }
     }
-    step() {
+
+    diffuseVelocity(u, v, prevU, prevV, viscosity, dt, diffuseIterations) { /* step where we add viscous forces
+    solves system of linear equations by Gauss-Seidel method
+    */
+        const h = Math.min(this.xPoints, this.yPoints);
+        const a = dt * viscosity * h * h;
+
+        u.set(prevU);
+        v.set(prevV);
+
+        for (let k = 0; k <= diffuseIterations; k++) {
+            for (let i = 1; i <= this.xPoints; i++) {
+                for (let j = 1; j <= this.yPoints; j++) {
+                    const pointIndex = this.IX(i, j);
+
+                    u[pointIndex] = (
+                        prevU[pointIndex] +
+                        a * (
+                            u[pointIndex - 1] +
+                            u[pointIndex + 1] +
+                            u[pointIndex - this.offset] +
+                            u[pointIndex + this.offset]
+                        )
+                    ) / (1 + 4 * a);
+
+                    v[pointIndex] = (
+                        prevV[pointIndex] +
+                        a * (
+                            v[pointIndex - 1] +
+                            v[pointIndex + 1] +
+                            v[pointIndex - this.offset] +
+                            v[pointIndex + this.offset]
+                        )
+                    ) / (1 + 4 * a);
+                }
+            }
+            this.setBoundaryVelocityOpen(u, v);
+        }
+    }
+
+    step() { // the algorithm with advancing forward in time is here
         this.applyVorticity();
+
+        this.u0.set(this.u);
+        this.v0.set(this.v);
+        this.diffuseVelocity(
+            this.u,
+            this.v,
+            this.u0,
+            this.v0,
+            this.parameters.viscosity,
+            this.parameters.dt,
+            this.parameters.diffuseIters
+        );
     }
 }
