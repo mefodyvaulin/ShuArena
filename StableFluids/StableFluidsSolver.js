@@ -1,14 +1,14 @@
 export class StableFluidsSolver {
     constructor(options = {}) {
         this.parameters = {
-            pressureIters: 30,
-            diffuseIters: 20,
+            pressureIters: 20,
+            diffuseIters: 8,
             dt: 0.025,
             viscosity: 0.00003,
             dyeDiffusion: 0.0,
             velocityDissipation: 0.996,
             dyeDissipation: 0.994,
-            vorticity: 14.0,
+            vorticity: 10.0,
             splatRadius: 6.0,
             forceScale: 0.38,
             dyeAmount: 0.03,
@@ -16,10 +16,6 @@ export class StableFluidsSolver {
             height: 120,
             ...options
         };
-
-        //if (options !== undefined) {
-        //    this.parameters = options;
-        //}
 
         this.xPoints = 0;
         this.yPoints = 0;
@@ -35,11 +31,11 @@ export class StableFluidsSolver {
         this.p = null;
         this.div = null;
         this.curl = null;
-
-
     }
 
-    initialize(params) { // initialization of fields
+    initialize(params = {}) { // initialization of fields
+        this.parameters = { ...this.parameters, ...params };
+
         this.xPoints = this.parameters.width;
         this.yPoints = this.parameters.height;
         this.offset = this.xPoints + 2;
@@ -94,17 +90,17 @@ export class StableFluidsSolver {
     setBoundaryVelocityOpen(u, v) { // Open boundary velocity fields, Neumann problem boundary conditions
         for (let i = 1; i <= this.xPoints; i++) {
             u[this.IX(i, 0)] = u[this.IX(i, 1)];
-            v[this.IX(i, 0)] = Math.min(v[this.IX(i, 1)], 0.0);
+            v[this.IX(i, 0)] = v[this.IX(i, 1)];
 
             u[this.IX(i, this.yPoints + 1)] = u[this.IX(i, this.yPoints)];
-            v[this.IX(i, this.yPoints + 1)] = Math.max(v[this.IX(i, this.yPoints)], 0.0);
+            v[this.IX(i, this.yPoints + 1)] = v[this.IX(i, this.yPoints)];
         }
 
         for (let j = 1; j <= this.yPoints; j++) {
-            u[this.IX(0, j)] = Math.min(u[this.IX(1, j)], 0.0);
+            u[this.IX(0, j)] = u[this.IX(1, j)];
             v[this.IX(0, j)] = v[this.IX(1, j)];
 
-            u[this.IX(this.xPoints + 1, j)] = Math.max(u[this.IX(this.xPoints, j)], 0.0);
+            u[this.IX(this.xPoints + 1, j)] = u[this.IX(this.xPoints, j)];
             v[this.IX(this.xPoints + 1, j)] = v[this.IX(this.xPoints, j)];
         }
 
@@ -114,7 +110,7 @@ export class StableFluidsSolver {
         u[this.IX(0, this.yPoints + 1)] = 0.5 * (u[this.IX(1, this.yPoints + 1)] + u[this.IX(0, this.yPoints)]);
         v[this.IX(0, this.yPoints + 1)] = 0.5 * (v[this.IX(1, this.yPoints + 1)] + v[this.IX(0, this.yPoints)]);
 
-        u[this.IX(this.xPoints+ 1, 0)] = 0.5 * (u[this.IX(this.xPoints, 0)] + u[this.IX(this.xPoints + 1, 1)]);
+        u[this.IX(this.xPoints + 1, 0)] = 0.5 * (u[this.IX(this.xPoints, 0)] + u[this.IX(this.xPoints + 1, 1)]);
         v[this.IX(this.xPoints + 1, 0)] = 0.5 * (v[this.IX(this.xPoints, 0)] + v[this.IX(this.xPoints + 1, 1)]);
 
         u[this.IX(this.xPoints + 1, this.yPoints + 1)] = 0.5 * (u[this.IX(this.xPoints, this.yPoints + 1)] + u[this.IX(this.xPoints + 1, this.yPoints)]);
@@ -142,21 +138,23 @@ export class StableFluidsSolver {
 
         for (let i = 2; i < this.xPoints; i++) {
             for (let j = 2; j < this.yPoints; j++) {
-                const forcePointIndex = this.IX(i, j);
+                const id = this.IX(i, j);
 
-                let nx = 0.5 * (Math.abs(this.curl[forcePointIndex + 1] - this.curl[forcePointIndex - 1]));
-                let ny = 0.5 * (Math.abs(this.curl[forcePointIndex + this.offset] - this.curl[forcePointIndex - this.offset]));
+                let nx = 0.5 * (Math.abs(this.curl[id + 1]) - Math.abs(this.curl[id - 1]));
+                let ny = 0.5 * (Math.abs(this.curl[id + this.offset]) - Math.abs(this.curl[id - this.offset]));
 
                 const len = Math.hypot(nx, ny) + 1e-6;
                 nx /= len;
                 ny /= len;
 
-                const c = this.curl[forcePointIndex];
+                const c = this.curl[id];
 
-                this.u[forcePointIndex] += this.parameters.vorticity * ny * c * this.parameters.dt;
-                this.v[forcePointIndex] -= this.parameters.vorticity * nx * c * this.parameters.dt;
+                this.u[id] += this.parameters.vorticity * ny * c * this.parameters.dt;
+                this.v[id] -= this.parameters.vorticity * nx * c * this.parameters.dt;
             }
         }
+
+        this.setBoundaryVelocityOpen(this.u, this.v);
     }
 
     diffuseVelocity(u, v, prevU, prevV, viscosity, dt, diffuseIterations) { /* step where we add viscous forces
@@ -169,7 +167,7 @@ export class StableFluidsSolver {
         u.set(prevU);
         v.set(prevV);
 
-        for (let k = 0; k <= diffuseIterations; k++) {
+        for (let k = 0; k < diffuseIterations; k++) {
             for (let i = 1; i <= this.xPoints; i++) {
                 for (let j = 1; j <= this.yPoints; j++) {
                     const pointIndex = this.IX(i, j);
@@ -205,6 +203,8 @@ export class StableFluidsSolver {
     */
         this.setBoundaryVelocityOpen(u, v);
 
+        p.fill(0);
+
         for (let i = 1; i <= this.xPoints; i++) {
             for (let j = 1; j <= this.yPoints; j++) {
                 const pointIndex = this.IX(i, j);
@@ -216,7 +216,6 @@ export class StableFluidsSolver {
         }
 
         this.setBoundaryScalarOpen(div);
-        this.setBoundaryScalarOpen(p);
 
         for (let k = 0; k < this.parameters.pressureIters; k++) {
             for (let j = 1; j <= this.yPoints; j++) {
@@ -246,9 +245,7 @@ export class StableFluidsSolver {
     }
 
     BilinearInterpolation(arr, x, y) { // Bilinear Interpolation for calculating speed at previous position of particle
-        if ((x < 0.5 || x > this.xPoints + 0.5 || y < 0.5 || y > this.yPoints + 0.5)) {
-            return 0.0;
-        }
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return 0.0;
 
         x = Math.max(0.5, Math.min(this.xPoints + 0.5, x));
         y = Math.max(0.5, Math.min(this.yPoints + 0.5, y));
@@ -268,7 +265,6 @@ export class StableFluidsSolver {
             s1 * (t0 * arr[this.IX(i1, j0)] + t1 * arr[this.IX(i1, j1)])
         );
     }
-
 
     advectVelocity(u, v, uPrev, vPrev, dt, dissipation) { /* advection step
     moving particles according semi-lagrangian approach
@@ -433,15 +429,16 @@ export class StableFluidsSolver {
 
     splatSegment(x0, y0, x1, y1, fx, fy, amount) {
         const dist = Math.hypot(x1 - x0, y1 - y0);
-        const steps = Math.max(1, Math.ceil(dist / Math.max(1.0, this.params.splatRadius * 0.35)));
+        const radius = this.parameters.splatRadius; // FIX
+        const steps = Math.max(1, Math.ceil(dist / Math.max(1.0, radius * 0.35)));
 
         for (let s = 0; s <= steps; s++) {
             const t = steps === 0 ? 0 : s / steps;
             const x = x0 + (x1 - x0) * t;
             const y = y0 + (y1 - y0) * t;
 
-            this.addVelocitySplat(x, y, fx, fy, this.parameters.splatRadius);
-            this.addDyeSplat(x, y, amount, this.parameters.splatRadius * 1.25);
+            this.addVelocitySplat(x, y, fx, fy, radius);
+            this.addDyeSplat(x, y, amount, radius * 1.25);
         }
 
         this.setBoundaryVelocityOpen(this.u, this.v);
