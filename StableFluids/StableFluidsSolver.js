@@ -389,4 +389,68 @@ export class StableFluidsSolver {
             this.parameters.dyeDissipation
         );
     }
+
+    addVelocitySplat(cx, cy, fx, fy, radius = this.parameters.splatRadius) {
+        const r = Math.ceil(radius * 2);
+        const rr = radius * radius;
+
+        const minX = Math.max(1, Math.floor(cx - r));
+        const maxX = Math.min(this.W, Math.ceil(cx + r));
+        const minY = Math.max(1, Math.floor(cy - r));
+        const maxY = Math.min(this.H, Math.ceil(cy + r));
+
+        for (let j = minY; j <= maxY; j++) {
+            for (let i = minX; i <= maxX; i++) {
+                const dx = i - cx;
+                const dy = j - cy;
+                const d2 = dx * dx + dy * dy;
+                if (d2 > rr * 4) continue;
+
+                const w = Math.exp(-d2 / rr);
+                const id = this.IX(i, j);
+                this.u[id] += fx * w;
+                this.v[id] += fy * w;
+            }
+        }
+    }
+
+    addDyeSplat(cx, cy, amount, radius = this.parameters.splatRadius) {
+        const r = Math.ceil(radius * 2);
+        const rr = radius * radius;
+
+        const minX = Math.max(1, Math.floor(cx - r));
+        const maxX = Math.min(this.W, Math.ceil(cx + r));
+        const minY = Math.max(1, Math.floor(cy - r));
+        const maxY = Math.min(this.H, Math.ceil(cy + r));
+
+        for (let j = minY; j <= maxY; j++) {
+            for (let i = minX; i <= maxX; i++) {
+                const dx = i - cx;
+                const dy = j - cy;
+                const d2 = dx * dx + dy * dy;
+                if (d2 > rr * 4) continue;
+
+                const w = Math.exp(-d2 / rr);
+                const id = this.IX(i, j);
+                this.d[id] += amount * w;
+            }
+        }
+    }
+
+    splatSegment(x0, y0, x1, y1, fx, fy, amount) {
+        const dist = Math.hypot(x1 - x0, y1 - y0);
+        const steps = Math.max(1, Math.ceil(dist / Math.max(1.0, this.params.splatRadius * 0.35)));
+
+        for (let s = 0; s <= steps; s++) {
+            const t = steps === 0 ? 0 : s / steps;
+            const x = x0 + (x1 - x0) * t;
+            const y = y0 + (y1 - y0) * t;
+
+            this.addVelocitySplat(x, y, fx, fy, this.parameters.splatRadius);
+            this.addDyeSplat(x, y, amount, this.parameters.splatRadius * 1.25);
+        }
+
+        this.setBoundaryVelocityOpen(this.u, this.v);
+        this.setBoundaryScalarOpen(this.d);
+    }
 }
