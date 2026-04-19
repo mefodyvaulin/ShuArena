@@ -1,0 +1,30 @@
+#main-header{
+    height: 100px;
+    text-align: center;
+    margin-top: 50px;
+}
+
+#main-title{
+    color: blue;
+    font-size: 70px;
+}
+
+.simulation-button{
+    display: block;
+    height: 200px;
+    border-radius: 15px;
+    background-color: white;
+}
+
+.simulation-button:hover {
+    transform: scale(1.03);
+}
+
+#simulation-buttons-container{
+    display: grid;
+    grid-gap: 25px;
+    justify-content: center;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 650px));
+    padding: 25px;
+    margin: 50px;
+}
