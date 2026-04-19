@@ -1,12 +1,12 @@
-﻿const dotCount = 5000;
-let lastPos = new Float64Array(dotCount);
-let currentPos = new Float64Array(dotCount);
-const nextPos = new Float64Array(dotCount);
+﻿const dotsCount = 5000;
+let lastPos = new Float64Array(dotsCount);
+let currentPos = new Float64Array(dotsCount);
+const nextPos = new Float64Array(dotsCount);
 
 const dt = 0.0001;
-const startG = new Float64Array(dotCount).fill(10);
+const startG = new Float64Array(dotsCount).fill(10);
 const c = 0.1;
-const dx = 1 / (dotCount - 1);
+const dx = 1 / (dotsCount - 1);
 const r = c * dt / dx;
 
 const deltaH = 50;
@@ -19,9 +19,9 @@ function drawCurrent() {
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = 'blue';
-    for (let i = 0; i < dotCount; i++) {
-        const x = (i / (dotCount - 1)) * w;
+    ctx.fillStyle = 'white';
+    for (let i = 0; i < dotsCount; i++) {
+        const x = (i / (dotsCount - 1)) * w;
         const y = (currentPos[i] / 100) * h;
         ctx.fillRect(x, y, 2, 2);
     }
@@ -29,8 +29,8 @@ function drawCurrent() {
 
 function calculateNext() {
     nextPos[0] = deltaH;
-    nextPos[dotCount - 1] = deltaH;
-    for (let i = 1; i < dotCount - 1; i++) {
+    nextPos[dotsCount - 1] = deltaH;
+    for (let i = 1; i < dotsCount - 1; i++) {
         nextPos[i] =
             2 * currentPos[i] - lastPos[i] +
             (r * r) * (currentPos[i + 1] - 2 * currentPos[i] + currentPos[i - 1]);
@@ -39,33 +39,93 @@ function calculateNext() {
     currentPos.set(nextPos);
 }
 
+let animationId = null;
+let isRunning = false;
+
 function waveStep() {
+    if (!isRunning) return;
     for (let s = 0; s < stepsPerFrame; s++) {
         calculateNext();
     }
 
     drawCurrent();
-    requestAnimationFrame(waveStep);
+    animationId = requestAnimationFrame(waveStep);
+}
+function startWave() {
+    if (!isRunning) {
+        isRunning = true;
+        waveStep();
+    }
 }
 
-function fillFormLayer() {
+function stopWave() {
+    isRunning = false;
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
+}
+
+function sin() {
     const mode = 16;
     const mode2 = Math.PI;
-    for (let i = 0; i < dotCount; i++) {
-        const progress = i / (dotCount - 1);
+    for (let i = 0; i < dotsCount; i++) {
+        const progress = i / (dotsCount - 1);
         const amplitude = 10 * Math.sin(mode2 * Math.PI * progress);
         const shape = amplitude * Math.sin(mode * Math.PI * progress);
         lastPos[i] = deltaH + shape;
     }
     lastPos[0] = deltaH;
-    lastPos[dotCount - 1] = deltaH;
+    lastPos[dotsCount - 1] = deltaH;
+}
+function line() {
+    for (let i = 0; i < dotsCount; i++) {
+        lastPos[i] = deltaH;
+    }
+}
+function fillFormLayer() {
+    sin()
+    drawCurrent();
+}
+
+let isDrawing = false;
+canvas.addEventListener('mousedown', mouseDownHandler);
+function mouseDownHandler(e) {
+    isDrawing = true;
+}
+
+canvas.addEventListener("mousemove", mouseMoveHandler, false);
+function mouseMoveHandler(e) {
+    if (isDrawing && !isRunning) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = dotsCount * (e.clientX - rect.left) / canvas.clientWidth;
+        const mouseY = (e.clientY - rect.top) / canvas.clientHeight * 100
+        console.log(mouseX, mouseY)
+        for (let i = 1; i < dotsCount - 1; i++) {
+            if (Math.abs(i - mouseX) < 20 && Math.abs(currentPos[i] - mouseY) < 10)
+                currentPos[i] = mouseY;
+        }
+        lastPos = currentPos
+
+        for (let i = 1; i < 1000; i++) {
+            calculateNext();
+
+        }
+        drawCurrent();
+
+    }
+}
+
+canvas.addEventListener('mouseup', mouseUpHandler);
+function mouseUpHandler() {
+    isDrawing = false;
 }
 
 function fillFirstLayer() {
     currentPos[0] = deltaH;
-    currentPos[dotCount - 1] = deltaH;
+    currentPos[dotsCount - 1] = deltaH;
 
-    for (let i = 1; i < dotCount - 1; i++) {
+    for (let i = 1; i < dotsCount - 1; i++) {
         currentPos[i] =
             lastPos[i] +
             dt * startG[i] +
@@ -73,12 +133,8 @@ function fillFirstLayer() {
     }
 }
 
-function init() {
-    fillFormLayer();
-    fillFirstLayer();
-}
 
-function resizeCanvas() {
+function resizeCanvas(){
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
 
@@ -90,6 +146,16 @@ function resizeCanvas() {
 
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
-init();
+fillFormLayer();
+fillFirstLayer();
 drawCurrent();
-requestAnimationFrame(waveStep);
+
+document.getElementById('start').addEventListener('click', (e) =>{
+    if (isRunning) {
+        stopWave();
+    }
+    else {
+        fillFirstLayer();
+        startWave();
+    }
+});
