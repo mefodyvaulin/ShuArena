@@ -11,9 +11,7 @@ export class StableFluidsSolver {
             vorticity: 10.0,
             splatRadius: 6.0,
             forceScale: 0.38,
-            dyeAmount: 0.03,
-            width: 170,
-            height: 120,
+            dyeAmount: 0.05,
             ...options
         };
 

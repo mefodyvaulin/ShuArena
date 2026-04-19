@@ -6,9 +6,12 @@ const ctx = canvas.getContext('2d', { alpha: false });
 const simCanvas = document.createElement('canvas');
 const simCtx = simCanvas.getContext('2d');
 
+const width = 300
+const aspect = 9 / 16
+
 const solver = new StableFluidsSolver({
-    width: 250,
-    height: 180
+    width: width,
+    height: Math.floor(width * aspect),
 });
 
 solver.initialize();
