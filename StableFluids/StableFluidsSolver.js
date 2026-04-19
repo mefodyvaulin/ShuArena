@@ -1,8 +1,8 @@
 export class StableFluidsSolver {
     constructor(options = {}) {
         this.parameters = { // all we'll need for simulation
-            pressureIters: 20,
-            diffuseIters: 8,
+            pressureIters: 30,
+            diffuseIters: 20,
             dt: 0.025,
 
             viscosity: 0.00003,
@@ -294,6 +294,50 @@ export class StableFluidsSolver {
         this.setBoundaryVelocityOpen(u, v);
     }
 
+    diffuseScalar(dst, src, diff, dt, diffusionIteration) { /* Viscous forces to a scalar dye field
+    algorithm the same as in the diffuseVelocity method but now only for one field
+    */
+        const h = Math.min(this.xPoints, this.yPoints);
+        const a = dt * diff * h * h;
+
+        dst.set(src);
+
+        for (let k = 0; k < diffusionIteration; k++) {
+            for (let j = 1; j <= this.yPoints; j++) {
+                for (let i = 1; i <= this.xPoints; i++) {
+                    const pointIndex = this.IX(i, j);
+                    dst[pointIndex] = (
+                        src[pointIndex] +
+                        a * (
+                            dst[pointIndex - 1] +
+                            dst[pointIndex + 1] +
+                            dst[pointIndex - this.offset] +
+                            dst[pointIndex + this.offset]
+                        )
+                    ) / (1 + 4 * a);
+                }
+            }
+            this.setBoundaryScalarOpen(dst);
+        }
+    }
+
+    advectScalar(dst, src, velU, velV, dt, dissipation) { /* Semi-lagrangian advection for scalar dye field
+    */
+        this.setBoundaryScalarOpen(src);
+        this.setBoundaryVelocityOpen(velU, velV);
+
+        for (let j = 1; j <= this.H; j++) {
+            for (let i = 1; i <= this.W; i++) {
+                const id = this.IX(i, j);
+                const x = i - dt * velU[id];
+                const y = j - dt * velV[id];
+                dst[id] = this.BilinearInterpolation(src, x, y) * dissipation;
+            }
+        }
+
+        this.setBoundaryScalarOpen(dst);
+    }
+
     step() { // the algorithm with advancing forward in time is here
         this.applyVorticity();
 
@@ -326,5 +370,23 @@ export class StableFluidsSolver {
 
         this.project(this.u, this.v, this.p, this.div);
 
+        this.d0.set(this.d);
+        this.diffuseScalar(
+            this.d,
+            this.d0,
+            this.parameters.dyeDiffusion,
+            this.parameters.dt,
+            this.parameters.diffuseIters
+        );
+
+        this.d0.set(this.d);
+        this.advectScalar(
+            this.d,
+            this.d0,
+            this.u,
+            this.v,
+            this.parameters.dt,
+            this.parameters.dyeDissipation
+        );
     }
 }
