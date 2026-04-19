@@ -141,8 +141,26 @@ export class StableFluidsSolver {
         this.setBoundaryScalarOpen(this.curl);
     }
 
-    applyVorticity() {
+    applyVorticity() { // computation of vorticity force, F = ∇curl * curl * vorticity * dt
+        this.computeCurl();
 
+        for (let i = 2; i < this.xPoints; i++) {
+            for (let j = 2; j < this.yPoints; j++) {
+                const forcePointIndex = this.IX(i, j);
+
+                let nx = 0.5 * (Math.abs(this.curl[forcePointIndex + 1] - this.curl[forcePointIndex - 1]));
+                let ny = 0.5 * (Math.abs(this.curl[forcePointIndex + this.offset] - this.curl[forcePointIndex - this.offset]));
+
+                const len = Math.hypot(nx, ny) + 1e-6;
+                nx /= len;
+                ny /= len;
+
+                const c = this.curl[forcePointIndex];
+
+                this.u[forcePointIndex] += this.parameters.vorticity * ny * c * this.parameters.dt;
+                this.v[forcePointIndex] -= this.parameters.vorticity * nx * c * this.parameters.dt;
+            }
+        }
     }
     step() {
         this.applyVorticity();
