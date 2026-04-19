@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Wave</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="../simulation.css">
+    <link rel="stylesheet" href="wave-style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Turret+Road:wght@200;300;400;500;700;800&display=swap" rel="stylesheet">
+    <script src="../simulation.js"></script>
+    <script type="module" src="script.js"></script>
+</head>
+<body>
+<header id = "simulation-header">
+    <a class = "main-page-link" href = "../../main-page/index.html">
+        <img src = "../../assets/logo.png" alt = "Логотип ШУ арены" class = "logo">
+    </a>
+    <h1 class = "simulation-title">
+        Wave
+    </h1>
+    <button class = "simulation-settings-button" onclick = "onClickSimulationSettingsButton()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+</header>
+
+<div class="simulation-wrapper">
+    <div class = "container" id = "simulation-content">
+        <canvas id="canvas" class="canvas" ></canvas>
+        <button id="start" class="button">Start</button>
+    </div>
+
+    <aside class = "simulation-settings-panel container">
+
+        <div class = "field">
+            <label for = "parameter1">Параметр</label>
+            <input type="number" id = "parameter1" min="0" max="100" step="0.01" value="67">
+        </div>
+
+        <div class = "field">
+            <label for = "parameter2">
+                Параметр
+            </label>
+            <select id = "parameter2">
+                <option value = "p1"> Что-то </option>
+            </select>
+        </div>
+
+        <div class = "selector">
+            <div class = "selector-title">Заголовок селектора</div>
+            <div class = "selector-buttons">
+                <button id = "button1" type = "button" class = "active">Кнопка 1</button>
+                <button id = "button2" type = "button">Кнопка 2</button>
+            </div>
+        </div>
+
+        <label class = "checkbox">
+            <input id = "checkbox1" type = "checkbox">
+            Параметр
+        </label>
+
+    </aside>
+</div>
+</body>
+</html>
