@@ -165,6 +165,7 @@ export class StableFluidsSolver {
 
     diffuseVelocity(u, v, prevU, prevV, viscosity, dt, diffuseIterations) { /* step where we add viscous forces
     solves system of linear equations by Gauss-Seidel method
+    (E - viscosity * dt * ∇ ^ 2) * (new velocity field) = old velocity field
     */
         const h = Math.min(this.xPoints, this.yPoints);
         const a = dt * viscosity * h * h;
@@ -202,6 +203,52 @@ export class StableFluidsSolver {
         }
     }
 
+    project(u, v, p, div){ /* step of forcing incompressibility according to continuity equation ∇u = 0
+    1) solving system: ∇ ^ 2 p = ∇ * old velocity field
+    2) applying correction to velocity field: new velocity field = old velocity field - ∇p
+    */
+        this.setBoundaryVelocityOpen(u, v);
+
+        for (let i = 1; i <= this.xPoints; i++) {
+            for (let j = 1; j <= this.yPoints; j++) {
+                const pointIndex = this.IX(i, j);
+                div[pointIndex] = 0.5 * (
+                    (u[pointIndex + 1] - u[pointIndex - 1]) +
+                    (v[pointIndex + this.offset] - this.v[pointIndex - this.offset])
+                );
+            }
+        }
+
+        this.setBoundaryScalarOpen(div);
+        this.setBoundaryScalarOpen(p);
+
+        for (let k = 0; k < this.params.pressureIters; k++) {
+            for (let j = 1; j <= this.H; j++) {
+                for (let i = 1; i <= this.W; i++) {
+                    const pointIndex = this.IX(i, j);
+                    p[pointIndex] = 0.25 * (
+                        p[pointIndex - 1] +
+                        p[pointIndex + 1] +
+                        p[pointIndex - this.offset] +
+                        p[pointIndex + this.offset] -
+                        div[pointIndex]
+                    );
+                }
+            }
+            this.setBoundaryScalarOpen(p);
+        }
+
+        for (let j = 1; j <= this.H; j++) {
+            for (let i = 1; i <= this.W; i++) {
+                const pointIndex = this.IX(i, j);
+                u[pointIndex] -= 0.5 * (p[pointIndex + 1] - p[pointIndex - 1]);
+                v[pointIndex] -= 0.5 * (p[pointIndex + this.offset] - p[pointIndex - this.offset]);
+            }
+        }
+
+        this.setBoundaryVelocityOpen(u, v);
+    }
+
     step() { // the algorithm with advancing forward in time is here
         this.applyVorticity();
 
@@ -216,5 +263,7 @@ export class StableFluidsSolver {
             this.parameters.dt,
             this.parameters.diffuseIters
         );
+
+        this.project(this.u, this.v, this.p, this.div);
     }
 }
