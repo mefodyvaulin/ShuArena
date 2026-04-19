@@ -326,8 +326,8 @@ export class StableFluidsSolver {
         this.setBoundaryScalarOpen(src);
         this.setBoundaryVelocityOpen(velU, velV);
 
-        for (let j = 1; j <= this.H; j++) {
-            for (let i = 1; i <= this.W; i++) {
+        for (let j = 1; j <= this.yPoints; j++) {
+            for (let i = 1; i <= this.xPoints; i++) {
                 const id = this.IX(i, j);
                 const x = i - dt * velU[id];
                 const y = j - dt * velV[id];
@@ -395,9 +395,9 @@ export class StableFluidsSolver {
         const rr = radius * radius;
 
         const minX = Math.max(1, Math.floor(cx - r));
-        const maxX = Math.min(this.W, Math.ceil(cx + r));
+        const maxX = Math.min(this.xPoints, Math.ceil(cx + r));
         const minY = Math.max(1, Math.floor(cy - r));
-        const maxY = Math.min(this.H, Math.ceil(cy + r));
+        const maxY = Math.min(this.yPoints, Math.ceil(cy + r));
 
         for (let j = minY; j <= maxY; j++) {
             for (let i = minX; i <= maxX; i++) {
@@ -419,9 +419,9 @@ export class StableFluidsSolver {
         const rr = radius * radius;
 
         const minX = Math.max(1, Math.floor(cx - r));
-        const maxX = Math.min(this.W, Math.ceil(cx + r));
+        const maxX = Math.min(this.xPoints, Math.ceil(cx + r));
         const minY = Math.max(1, Math.floor(cy - r));
-        const maxY = Math.min(this.H, Math.ceil(cy + r));
+        const maxY = Math.min(this.yPoints, Math.ceil(cy + r));
 
         for (let j = minY; j <= maxY; j++) {
             for (let i = minX; i <= maxX; i++) {
