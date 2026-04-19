@@ -3,7 +3,7 @@ export class StableFluidsSolver {
         this.parameters = { // all we'll need for simulation
             pressureIters: 20,
             diffuseIters: 8,
-            dtMax: 0.033,
+            dt: 0.025,
 
             viscosity: 0.00003,
             dyeDiffusion: 0.0,
@@ -72,5 +72,50 @@ export class StableFluidsSolver {
         this.p.fill(0);
         this.div.fill(0);
         this.curl.fill(0);
+    }
+
+    IX(i, j) {
+        return i + this.offset * j;
+    }
+
+    setBoundaryVelocityOpen(u, v) {
+        for (let i = 1; i <= this.xPoints; i++) {
+            u[this.IX(i, 0)] = u[this.IX(i, 1)];
+            v[this.IX(i, 0)] = Math.min(v[this.IX(i, 1)], 0.0);
+
+            u[this.IX(i, this.yPoints + 1)] = u[this.IX(i, this.yPoints)];
+            v[this.IX(i, this.yPoints + 1)] = Math.max(v[this.IX(i, this.yPoints)], 0.0);
+        }
+
+        for (let j = 1; j <= this.yPoints; j++) {
+            u[this.IX(0, j)] = Math.min(u[this.IX(1, j)], 0.0);
+            v[this.IX(0, j)] = v[this.IX(1, j)];
+
+            u[this.IX(this.xPoints + 1, j)] = Math.max(u[this.IX(this.xPoints, j)], 0.0);
+            v[this.IX(this.xPoints + 1, j)] = v[this.IX(this.xPoints, j)];
+        }
+
+        u[this.IX(0, 0)] = 0.5 * (u[this.IX(1, 0)] + u[this.IX(0, 1)]);
+        v[this.IX(0, 0)] = 0.5 * (v[this.IX(1, 0)] + v[this.IX(0, 1)]);
+
+        u[this.IX(0, this.yPoints + 1)] = 0.5 * (u[this.IX(1, this.yPoints + 1)] + u[this.IX(0, this.yPoints)]);
+        v[this.IX(0, this.yPoints + 1)] = 0.5 * (v[this.IX(1, this.yPoints + 1)] + v[this.IX(0, this.yPoints)]);
+
+        u[this.IX(this.xPoints+ 1, 0)] = 0.5 * (u[this.IX(this.xPoints, 0)] + u[this.IX(this.xPoints + 1, 1)]);
+        v[this.IX(this.xPoints + 1, 0)] = 0.5 * (v[this.IX(this.xPoints, 0)] + v[this.IX(this.xPoints + 1, 1)]);
+
+        u[this.IX(this.xPoints + 1, this.yPoints + 1)] = 0.5 * (u[this.IX(this.xPoints, this.yPoints + 1)] + u[this.IX(this.xPoints + 1, this.yPoints)]);
+        v[this.IX(this.xPoints + 1, this.yPoints + 1)] = 0.5 * (v[this.IX(this.xPoints, this.yPoints + 1)] + v[this.IX(this.xPoints + 1, this.yPoints)]);
+    }
+
+    computeCurl() {
+
+    }
+
+    applyVorticity() {
+
+    }
+    step() {
+        this.applyVorticity();
     }
 }
