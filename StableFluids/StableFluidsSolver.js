@@ -1,29 +1,25 @@
 export class StableFluidsSolver {
     constructor(options = {}) {
-        this.parameters = { // all we'll need for simulation
+        this.parameters = {
             pressureIters: 30,
             diffuseIters: 20,
             dt: 0.025,
-
             viscosity: 0.00003,
             dyeDiffusion: 0.0,
-
             velocityDissipation: 0.996,
             dyeDissipation: 0.994,
-
             vorticity: 14.0,
-
             splatRadius: 6.0,
             forceScale: 0.38,
             dyeAmount: 0.03,
-
             width: 170,
-            height: 120
-        }
+            height: 120,
+            ...options
+        };
 
-        if (options !== undefined) {
-            this.parameters = options;
-        }
+        //if (options !== undefined) {
+        //    this.parameters = options;
+        //}
 
         this.xPoints = 0;
         this.yPoints = 0;
@@ -214,7 +210,7 @@ export class StableFluidsSolver {
                 const pointIndex = this.IX(i, j);
                 div[pointIndex] = 0.5 * (
                     (u[pointIndex + 1] - u[pointIndex - 1]) +
-                    (v[pointIndex + this.offset] - this.v[pointIndex - this.offset])
+                    (v[pointIndex + this.offset] - v[pointIndex - this.offset])
                 );
             }
         }
@@ -360,8 +356,6 @@ export class StableFluidsSolver {
         this.advectVelocity(
             this.u,
             this.v,
-            this.u0,
-            this.v0,
             this.u0,
             this.v0,
             this.parameters.dt,
