@@ -14,6 +14,9 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
+const simulationSettingsButton = document.querySelector('#simulation-settings-button');
+simulationSettingsButton.addEventListener('click', resizeCanvas);
+
 const bodies = [
     { number: 1, color: 'rgb(255, 0, 0)', mass: 1, position: {x: -0.97000436, y: 0.24308753}, velocity: {x: 0.4662036850, y: 0.4323657300 } },
     { number: 2, color: 'rgb(0, 255, 0)', mass: 1, position: {x: 0.97000436, y: -0.24308753}, velocity: {x: 0.4662036850, y: 0.4323657300 } },

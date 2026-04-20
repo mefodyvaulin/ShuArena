@@ -45,8 +45,15 @@ export default function initUI(config, bodies) {
         bindFloatInput(`#input-${name}BodyVelocityY`, val => config.bodies[index].velocity.y = val);
     });
 
-    bindClick('#pause-button', () => { config.isPaused = true; });
-    bindClick('#continue-button', () => { config.isPaused = false; });
+    bindClick('#pause-continue-button', () => {
+        if (!config.isPaused) {
+            config.isPaused = true;
+            document.querySelector('#pause-continue-button').textContent = "Продолжить";
+        } else {
+            config.isPaused = false;
+            document.querySelector('#pause-continue-button').textContent = "Пауза";
+        }
+    });
     bindClick('#reset-button', () => {
         for (let i = 0; i < config.bodies.length; i++) {
             config.bodies[i].position = {...bodies[i].position };

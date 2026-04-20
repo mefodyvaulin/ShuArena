@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="../simulation.css">
+    <link rel="stylesheet" href="styles-threeBody.css">
+    <link href="https://fonts.googleapis.com/css2?family=Turret+Road:wght@200;300;400;500;700;800&display=swap" rel="stylesheet">
+    <script src="../simulation.js"></script>
+    <script type="module" src="main.js"></script>
+</head>
+<body>
+<header id="simulation-header">
+    <a class="main-page-link" href="../../main-page/index.html">
+        <img src="../../assets/logo.png" alt="Логотип ШУ арены" class="logo">
+    </a>
+    <h1 class = "simulation-title">
+        Three body
+    </h1>
+    <button class="simulation-settings-button" id="simulation-settings-button" onclick="onClickSimulationSettingsButton()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+</header>
+
+<div class="simulation-wrapper">
+    <div class="container" id="simulation-content">
+        <canvas id="canvas" class="canvas"></canvas>
+    </div>
+
+    <aside class = "simulation-settings-panel container">
+        <div class="field">
+            <label for="input-g">G</label>
+            <input id="input-g" type="number" min="0.01" max="100" step="0.1">
+        </div>
+
+        <div class="field">
+            <label for="input-dt">Временной шаг (dt)</label>
+            <input id="input-dt" type="number" min="0.0001" max="100" step="0.01">
+        </div>
+
+        <div class="field">
+            <label for="input-timeSpeed">Скорость времени</label>
+            <input id="input-timeSpeed" type="number" min="0.1" max="100" step="1">
+        </div>
+
+        <div class="field">
+            <label for="field-borders">Граница поля</label>
+            <input id="field-borders" type="checkbox">
+        </div>
+
+        <fieldset class="body-settings-container">
+            <legend>Конфигурация 1-го тела</legend>
+            <div class="firstBodyConfig" id="firstBodyConfig">
+                <div class="field">
+                    <label for="input-firstBodyMass">Масса</label>
+                    <input id="input-firstBodyMass" type="number" min="0.1" max="100" step="0.1">
+                </div>
+
+                <div class="field">
+                    <label for="input-firstBodyPositionX">Положение по X</label>
+                    <input id="input-firstBodyPositionX" type="number" min="-100" max="100" step="1">
+                </div>
+
+                <div class="field">
+                    <label for="input-firstBodyPositionY">Положение по Y</label>
+                    <input id="input-firstBodyPositionY" type="number" min="-100" max="100" step="1">
+                </div>
+
+                <div class="field">
+                    <label for="input-firstBodyVelocityX">Скорость по X</label>
+                    <input id="input-firstBodyVelocityX" type="number" min="-100" max="100" step="1">
+                </div>
+
+                <div class="field">
+                    <label for="input-firstBodyVelocityY">Скорость по Y</label>
+                    <input id="input-firstBodyVelocityY" type="number" min="-100" max="100" step="1">
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="body-settings-container">
+            <legend>Конфигурация 2-го тела</legend>
+            <div class="secondBodyConfig" id="secondBodyConfig">
+                <div class="field">
+                    <label for="input-secondBodyMass">Масса</label>
+                    <input id="input-secondBodyMass" type="number" min="0.1" max="100" step="0.1">
+                </div>
+
+                <div class="field">
+                    <label for="input-secondBodyPositionX">Положение по X</label>
+                    <input id="input-secondBodyPositionX" type="number" min="-100" max="100" step="1">
+                </div>
+
+                <div class="field">
+                    <label for="input-secondBodyPositionY">Положение по Y</label>
+                    <input id="input-secondBodyPositionY" type="number" min="-100" max="100" step="1">
+                </div>
+
+                <div class="field">
+                    <label for="input-secondBodyVelocityX">Скорость по X</label>
+                    <input id="input-secondBodyVelocityX" type="number" min="-100" max="100" step="1">
+                </div>
+
+                <div class="field">
+                    <label for="input-secondBodyVelocityY">Скорость по Y</label>
+                    <input id="input-secondBodyVelocityY" type="number" min="-100" max="100" step="1">
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="body-settings-container">
+            <legend>Конфигурация 3-го тела</legend>
+            <div class="thirdBodyConfig" id="thirdBodyConfig">
+                <div class="field">
+                    <label for="input-thirdBodyMass">Масса</label>
+                    <input id="input-thirdBodyMass" type="number" min="0.1" max="100" step="0.1">
+                </div>
+
+                <div class="field">
+                    <label for="input-thirdBodyPositionX">Положение по X</label>
+                    <input id="input-thirdBodyPositionX" type="number" min="-100" max="100" step="1">
+                </div>
+
+                <div class="field">
+                    <label for="input-thirdBodyPositionY">Положение по Y</label>
+                    <input id="input-thirdBodyPositionY" type="number" min="-100" max="100" step="1">
+                </div>
+
+                <div class="field">
+                    <label for="input-thirdBodyVelocityX">Скорость по X</label>
+                    <input id="input-thirdBodyVelocityX" type="number" min="-100" max="100" step="1">
+                </div>
+
+                <div class="field">
+                    <label for="input-thirdBodyVelocityY">Скорость по Y</label>
+                    <input id="input-thirdBodyVelocityY" type="number" min="-100" max="100" step="1">
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="settings-buttons-container">
+            <button id="pause-continue-button" type="button">Пауза</button>
+        </div>
+
+        <div class="settings-buttons-container">
+            <button id="reset-button" type="button">Перезапустить</button>
+        </div>
+    </aside>
+</div>
+</body>
+</html>

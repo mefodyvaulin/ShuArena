@@ -64,7 +64,7 @@
     padding: 15px;
 }
 
-.field{
+.field {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -87,6 +87,9 @@
     color: white;
     outline: none;
     box-sizing: border-box;
+}
+.field input[type="checkbox"], .field select {
+    transform: scale(1.5);
 }
 
 .selector{

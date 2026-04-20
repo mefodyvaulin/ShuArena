@@ -36,20 +36,20 @@ startResetButton.addEventListener('click', (e) => {
 function init(){
     const wave = new Wave(CurveForm[curveForm], startSpeed, dotsCount);
     Drawer.drawCurve(wave.lastPos);
-    waveSimulator.setWave(wave)
+    waveSimulator.setWave(wave);
 
 }
-init()
+init();
 waveSimulator.startWave();
 
-document.getElementById('curveForm').addEventListener('click', (e) =>{
+document.getElementById('curveForm').addEventListener('change', (e) =>{
     resetSimulation();
     curveForm = e.target.value;
-    init()
+    init();
 });
 
 document.getElementById('startSpeed').addEventListener('change', (e) =>{
     resetSimulation();
     startSpeed = +e.target.value;
-    init()
+    init();
 });
