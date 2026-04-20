@@ -28,37 +28,35 @@
 <div class="simulation-wrapper">
     <div class = "container" id = "simulation-content">
         <canvas id="canvas" class="canvas" ></canvas>
-        <button id="start" class="button">Start</button>
     </div>
 
     <aside class = "simulation-settings-panel container">
 
         <div class = "field">
-            <label for = "parameter1">Параметр</label>
-            <input type="number" id = "parameter1" min="0" max="100" step="0.01" value="67">
+            <label for = "startSpeed">Начальная скорость</label>
+            <input type="number" id = "startSpeed" min="-10" max="10" step="1" value="0">
         </div>
 
         <div class = "field">
-            <label for = "parameter2">
-                Параметр
+            <label for = "curveForm">
+                Начальная форма кривой
             </label>
-            <select id = "parameter2">
-                <option value = "p1"> Что-то </option>
+            <select id = "curveForm">
+                <option value = "line"> Линия </option>
+                <option value = "sin" selected> Синусоида </option>
+                <option value = "smoothSquare"> Квадраты </option>
+                <option value = "modulated"> Радио </option>
+                <option value = "bell" > Колокол </option>
             </select>
         </div>
 
         <div class = "selector">
-            <div class = "selector-title">Заголовок селектора</div>
             <div class = "selector-buttons">
-                <button id = "button1" type = "button" class = "active">Кнопка 1</button>
-                <button id = "button2" type = "button">Кнопка 2</button>
+                <button id = "start-reset" type = "button" class = "active">Stop</button>
             </div>
         </div>
 
-        <label class = "checkbox">
-            <input id = "checkbox1" type = "checkbox">
-            Параметр
-        </label>
+
 
     </aside>
 </div>

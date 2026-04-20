@@ -1,12 +1,16 @@
 ﻿import Drawer from './Drawer.js';
 
 class WaveSimulator{
-    constructor(wave){
+    constructor(wave= null){
         this.wave = wave;
         this.animationId = null;
         this.isRunning = false;
         this.isDrawing = false;
         this.stepsPerFrame = 100;
+    }
+
+    setWave(wave){
+        this.wave = wave;
     }
 
     startWave = () =>  {
