@@ -15,15 +15,6 @@ let isDrawing = false;
 let canvas;
 let context;
 
-function onClickMenuButton() {
-    let panel = document.getElementsByClassName("simulation-settings-panel")[0];
-    if (panel.style.display === "none" || panel.style.display === "") {
-        panel.style.display = "block";
-    } else {
-        panel.style.display = "none";
-    }
-}
-
 window.onload = function() {
     canvas = document.getElementById('heatCanvas');
     context = canvas.getContext('2d');
