@@ -89,32 +89,34 @@
     box-sizing: border-box;
 }
 
+.selector{
+    margin-bottom: 10px;
+}
+
 .selector-title {
     margin-bottom: 8px;
     font-size: 17px;
     color: white;
 }
 
-.selector-buttons {
+.settings-buttons-container {
     display: flex;
     gap: 8px;
+    margin-bottom: 10px;
 }
 
-.selector-buttons button {
-    flex: 1;
-}
-
-.selector-buttons button {
+.settings-buttons-container button {
     padding: 9px 12px;
     border-radius: 9px;
     border: none;
     color: white;
     font-weight: 600;
     cursor: pointer;
+    flex: 1;
     background-color: gray;
 }
 
-.selector-buttons .active {
+.settings-buttons-container button.active {
     background-color: blue;
 }
 
