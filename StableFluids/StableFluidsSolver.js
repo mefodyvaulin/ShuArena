@@ -1,0 +1,445 @@
+export class StableFluidsSolver {
+    constructor(options = {}) {
+        this.parameters = {
+            pressureIters: 20,
+            diffuseIters: 8,
+            dt: 0.025,
+            viscosity: 0.00003,
+            dyeDiffusion: 0.0,
+            velocityDissipation: 0.996,
+            dyeDissipation: 0.994,
+            vorticity: 10.0,
+            splatRadius: 6.0,
+            forceScale: 0.38,
+            dyeAmount: 0.05,
+            ...options
+        };
+
+        this.xPoints = 0;
+        this.yPoints = 0;
+        this.offset = 0;
+        this.size = 0;
+
+        this.u = null;
+        this.v = null;
+        this.u0 = null;
+        this.v0 = null;
+        this.d = null;
+        this.d0 = null;
+        this.p = null;
+        this.div = null;
+        this.curl = null;
+    }
+
+    initialize(params = {}) { // initialization of fields
+        this.parameters = { ...this.parameters, ...params };
+
+        this.xPoints = this.parameters.width;
+        this.yPoints = this.parameters.height;
+        this.offset = this.xPoints + 2;
+        this.size = (this.xPoints + 2) * (this.yPoints + 2);
+
+        this.u = new Float32Array(this.size);
+        this.v = new Float32Array(this.size);
+        this.u0 = new Float32Array(this.size);
+        this.v0 = new Float32Array(this.size);
+
+        this.d = new Float32Array(this.size);
+        this.d0 = new Float32Array(this.size);
+
+        this.p = new Float32Array(this.size);
+        this.div = new Float32Array(this.size);
+        this.curl = new Float32Array(this.size);
+    }
+
+    fillZeros(){ // initial state
+        this.u.fill(0);
+        this.v.fill(0);
+        this.u0.fill(0);
+        this.v0.fill(0);
+        this.d.fill(0);
+        this.d0.fill(0);
+        this.p.fill(0);
+        this.div.fill(0);
+        this.curl.fill(0);
+    }
+
+    IX(i, j) {
+        return i + this.offset * j;
+    }
+
+    setBoundaryScalarOpen(field){ // boundary conditions for scalar fields
+        for (let i= 1; i <= this.xPoints; i++) {
+            field[this.IX(i, 0)] = field[this.IX(i, 1)];
+            field[this.IX(i, this.yPoints + 1)] = field[this.IX(i, this.yPoints)];
+        }
+
+        for (let j = 1; j <= this.yPoints; j++){
+            field[this.IX(0, j)] = field[this.IX(1, j)];
+            field[this.IX(this.xPoints + 1, j)] = field[this.IX(this.xPoints, j)];
+        }
+
+        field[this.IX(0, 0)] = 0.5 * (field[this.IX(1, 0)] + field[this.IX(0, 1)]);
+        field[this.IX(0, this.yPoints + 1)] = 0.5 * (field[this.IX(1, this.yPoints + 1)] + field[this.IX(0, this.yPoints)]);
+        field[this.IX(this.xPoints + 1, 0)] = 0.5 * (field[this.IX(this.xPoints, 0)] + field[this.IX(this.xPoints + 1, 1)]);
+        field[this.IX(this.xPoints + 1, this.yPoints + 1)] = 0.5 * (field[this.IX(this.xPoints, this.yPoints + 1)] + field[this.IX(this.xPoints + 1, this.yPoints)]);
+    }
+
+    setBoundaryVelocityOpen(u, v) { // Open boundary velocity fields, Neumann problem boundary conditions
+        for (let i = 1; i <= this.xPoints; i++) {
+            u[this.IX(i, 0)] = u[this.IX(i, 1)];
+            v[this.IX(i, 0)] = v[this.IX(i, 1)];
+
+            u[this.IX(i, this.yPoints + 1)] = u[this.IX(i, this.yPoints)];
+            v[this.IX(i, this.yPoints + 1)] = v[this.IX(i, this.yPoints)];
+        }
+
+        for (let j = 1; j <= this.yPoints; j++) {
+            u[this.IX(0, j)] = u[this.IX(1, j)];
+            v[this.IX(0, j)] = v[this.IX(1, j)];
+
+            u[this.IX(this.xPoints + 1, j)] = u[this.IX(this.xPoints, j)];
+            v[this.IX(this.xPoints + 1, j)] = v[this.IX(this.xPoints, j)];
+        }
+
+        u[this.IX(0, 0)] = 0.5 * (u[this.IX(1, 0)] + u[this.IX(0, 1)]);
+        v[this.IX(0, 0)] = 0.5 * (v[this.IX(1, 0)] + v[this.IX(0, 1)]);
+
+        u[this.IX(0, this.yPoints + 1)] = 0.5 * (u[this.IX(1, this.yPoints + 1)] + u[this.IX(0, this.yPoints)]);
+        v[this.IX(0, this.yPoints + 1)] = 0.5 * (v[this.IX(1, this.yPoints + 1)] + v[this.IX(0, this.yPoints)]);
+
+        u[this.IX(this.xPoints + 1, 0)] = 0.5 * (u[this.IX(this.xPoints, 0)] + u[this.IX(this.xPoints + 1, 1)]);
+        v[this.IX(this.xPoints + 1, 0)] = 0.5 * (v[this.IX(this.xPoints, 0)] + v[this.IX(this.xPoints + 1, 1)]);
+
+        u[this.IX(this.xPoints + 1, this.yPoints + 1)] = 0.5 * (u[this.IX(this.xPoints, this.yPoints + 1)] + u[this.IX(this.xPoints + 1, this.yPoints)]);
+        v[this.IX(this.xPoints + 1, this.yPoints + 1)] = 0.5 * (v[this.IX(this.xPoints, this.yPoints + 1)] + v[this.IX(this.xPoints + 1, this.yPoints)]);
+    }
+
+    computeCurl() { // curl is scalar field, curl = ∂v/∂x - ∂u/∂y
+        this.setBoundaryVelocityOpen(this.u, this.v);
+
+        for (let i = 1; i <= this.xPoints; i++) {
+            for (let j = 1; j <= this.yPoints; j++) {
+                const derivativePointIndex = this.IX(i, j);
+                this.curl[derivativePointIndex] = 0.5 * (
+                    (this.v[derivativePointIndex + 1] - this.v[derivativePointIndex - 1]) -
+                    (this.u[derivativePointIndex + this.offset] - this.u[derivativePointIndex - this.offset])
+                );
+            }
+        }
+
+        this.setBoundaryScalarOpen(this.curl);
+    }
+
+    applyVorticity() { // computation of vorticity force, F = ∇curl * curl * vorticity * dt
+        this.computeCurl();
+
+        for (let i = 2; i < this.xPoints; i++) {
+            for (let j = 2; j < this.yPoints; j++) {
+                const id = this.IX(i, j);
+
+                let nx = 0.5 * (Math.abs(this.curl[id + 1]) - Math.abs(this.curl[id - 1]));
+                let ny = 0.5 * (Math.abs(this.curl[id + this.offset]) - Math.abs(this.curl[id - this.offset]));
+
+                const len = Math.hypot(nx, ny) + 1e-6;
+                nx /= len;
+                ny /= len;
+
+                const c = this.curl[id];
+
+                this.u[id] += this.parameters.vorticity * ny * c * this.parameters.dt;
+                this.v[id] -= this.parameters.vorticity * nx * c * this.parameters.dt;
+            }
+        }
+
+        this.setBoundaryVelocityOpen(this.u, this.v);
+    }
+
+    diffuseVelocity(u, v, prevU, prevV, viscosity, dt, diffuseIterations) { /* step where we add viscous forces
+    solves system of linear equations by Gauss-Seidel method
+    (E - viscosity * dt * ∇ ^ 2) * (new velocity field) = old velocity field
+    */
+        const h = Math.min(this.xPoints, this.yPoints);
+        const a = dt * viscosity * h * h;
+
+        u.set(prevU);
+        v.set(prevV);
+
+        for (let k = 0; k < diffuseIterations; k++) {
+            for (let i = 1; i <= this.xPoints; i++) {
+                for (let j = 1; j <= this.yPoints; j++) {
+                    const pointIndex = this.IX(i, j);
+
+                    u[pointIndex] = (
+                        prevU[pointIndex] +
+                        a * (
+                            u[pointIndex - 1] +
+                            u[pointIndex + 1] +
+                            u[pointIndex - this.offset] +
+                            u[pointIndex + this.offset]
+                        )
+                    ) / (1 + 4 * a);
+
+                    v[pointIndex] = (
+                        prevV[pointIndex] +
+                        a * (
+                            v[pointIndex - 1] +
+                            v[pointIndex + 1] +
+                            v[pointIndex - this.offset] +
+                            v[pointIndex + this.offset]
+                        )
+                    ) / (1 + 4 * a);
+                }
+            }
+            this.setBoundaryVelocityOpen(u, v);
+        }
+    }
+
+    project(u, v, p, div){ /* step of forcing incompressibility according to continuity equation ∇u = 0
+    1) solving system: ∇ ^ 2 p = ∇ * old velocity field
+    2) applying correction to velocity field: new velocity field = old velocity field - ∇p
+    */
+        this.setBoundaryVelocityOpen(u, v);
+
+        p.fill(0);
+
+        for (let i = 1; i <= this.xPoints; i++) {
+            for (let j = 1; j <= this.yPoints; j++) {
+                const pointIndex = this.IX(i, j);
+                div[pointIndex] = 0.5 * (
+                    (u[pointIndex + 1] - u[pointIndex - 1]) +
+                    (v[pointIndex + this.offset] - v[pointIndex - this.offset])
+                );
+            }
+        }
+
+        this.setBoundaryScalarOpen(div);
+
+        for (let k = 0; k < this.parameters.pressureIters; k++) {
+            for (let j = 1; j <= this.yPoints; j++) {
+                for (let i = 1; i <= this.xPoints; i++) {
+                    const pointIndex = this.IX(i, j);
+                    p[pointIndex] = 0.25 * (
+                        p[pointIndex - 1] +
+                        p[pointIndex + 1] +
+                        p[pointIndex - this.offset] +
+                        p[pointIndex + this.offset] -
+                        div[pointIndex]
+                    );
+                }
+            }
+            this.setBoundaryScalarOpen(p);
+        }
+
+        for (let j = 1; j <= this.yPoints; j++) {
+            for (let i = 1; i <= this.xPoints; i++) {
+                const pointIndex = this.IX(i, j);
+                u[pointIndex] -= 0.5 * (p[pointIndex + 1] - p[pointIndex - 1]);
+                v[pointIndex] -= 0.5 * (p[pointIndex + this.offset] - p[pointIndex - this.offset]);
+            }
+        }
+
+        this.setBoundaryVelocityOpen(u, v);
+    }
+
+    BilinearInterpolation(arr, x, y) { // Bilinear Interpolation for calculating speed at previous position of particle
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return 0.0;
+
+        x = Math.max(0.5, Math.min(this.xPoints + 0.5, x));
+        y = Math.max(0.5, Math.min(this.yPoints + 0.5, y));
+
+        const i0 = Math.floor(x);
+        const i1 = Math.min(i0 + 1, this.xPoints + 1);
+        const j0 = Math.floor(y);
+        const j1 = Math.min(j0 + 1, this.yPoints + 1);
+
+        const s1 = x - i0;
+        const s0 = 1.0 - s1;
+        const t1 = y - j0;
+        const t0 = 1.0 - t1;
+
+        return (
+            s0 * (t0 * arr[this.IX(i0, j0)] + t1 * arr[this.IX(i0, j1)]) +
+            s1 * (t0 * arr[this.IX(i1, j0)] + t1 * arr[this.IX(i1, j1)])
+        );
+    }
+
+    advectVelocity(u, v, uPrev, vPrev, dt, dissipation) { /* advection step
+    moving particles according semi-lagrangian approach
+    new velocity field (r, t + dt) = old velocity field (r - u * dt, t)
+    */
+        this.setBoundaryVelocityOpen(uPrev, vPrev);
+
+        for (let j = 1; j <= this.yPoints; j++) {
+            for (let i = 1; i <= this.xPoints; i++) {
+                const id = this.IX(i, j);
+                const x = i - dt * uPrev[id];
+                const y = j - dt * vPrev[id];
+
+                u[id] = this.BilinearInterpolation(uPrev, x, y) * dissipation;
+                v[id] = this.BilinearInterpolation(vPrev, x, y) * dissipation;
+            }
+        }
+
+        this.setBoundaryVelocityOpen(u, v);
+    }
+
+    diffuseScalar(dst, src, diff, dt, diffusionIteration) { /* Viscous forces to a scalar dye field
+    algorithm the same as in the diffuseVelocity method but now only for one field
+    */
+        const h = Math.min(this.xPoints, this.yPoints);
+        const a = dt * diff * h * h;
+
+        dst.set(src);
+
+        for (let k = 0; k < diffusionIteration; k++) {
+            for (let j = 1; j <= this.yPoints; j++) {
+                for (let i = 1; i <= this.xPoints; i++) {
+                    const pointIndex = this.IX(i, j);
+                    dst[pointIndex] = (
+                        src[pointIndex] +
+                        a * (
+                            dst[pointIndex - 1] +
+                            dst[pointIndex + 1] +
+                            dst[pointIndex - this.offset] +
+                            dst[pointIndex + this.offset]
+                        )
+                    ) / (1 + 4 * a);
+                }
+            }
+            this.setBoundaryScalarOpen(dst);
+        }
+    }
+
+    advectScalar(dst, src, velU, velV, dt, dissipation) { /* Semi-lagrangian advection for scalar dye field
+    */
+        this.setBoundaryScalarOpen(src);
+        this.setBoundaryVelocityOpen(velU, velV);
+
+        for (let j = 1; j <= this.yPoints; j++) {
+            for (let i = 1; i <= this.xPoints; i++) {
+                const id = this.IX(i, j);
+                const x = i - dt * velU[id];
+                const y = j - dt * velV[id];
+                dst[id] = this.BilinearInterpolation(src, x, y) * dissipation;
+            }
+        }
+
+        this.setBoundaryScalarOpen(dst);
+    }
+
+    step() { // the algorithm with advancing forward in time is here
+        this.applyVorticity();
+
+        this.u0.set(this.u);
+        this.v0.set(this.v);
+        this.diffuseVelocity(
+            this.u,
+            this.v,
+            this.u0,
+            this.v0,
+            this.parameters.viscosity,
+            this.parameters.dt,
+            this.parameters.diffuseIters
+        );
+
+        this.project(this.u, this.v, this.p, this.div);
+
+        this.u0.set(this.u);
+        this.v0.set(this.v);
+        this.advectVelocity(
+            this.u,
+            this.v,
+            this.u0,
+            this.v0,
+            this.parameters.dt,
+            this.parameters.velocityDissipation
+        );
+
+        this.project(this.u, this.v, this.p, this.div);
+
+        this.d0.set(this.d);
+        this.diffuseScalar(
+            this.d,
+            this.d0,
+            this.parameters.dyeDiffusion,
+            this.parameters.dt,
+            this.parameters.diffuseIters
+        );
+
+        this.d0.set(this.d);
+        this.advectScalar(
+            this.d,
+            this.d0,
+            this.u,
+            this.v,
+            this.parameters.dt,
+            this.parameters.dyeDissipation
+        );
+    }
+
+    addVelocitySplat(cx, cy, fx, fy, radius = this.parameters.splatRadius) {
+        const r = Math.ceil(radius * 2);
+        const rr = radius * radius;
+
+        const minX = Math.max(1, Math.floor(cx - r));
+        const maxX = Math.min(this.xPoints, Math.ceil(cx + r));
+        const minY = Math.max(1, Math.floor(cy - r));
+        const maxY = Math.min(this.yPoints, Math.ceil(cy + r));
+
+        for (let j = minY; j <= maxY; j++) {
+            for (let i = minX; i <= maxX; i++) {
+                const dx = i - cx;
+                const dy = j - cy;
+                const d2 = dx * dx + dy * dy;
+                if (d2 > rr * 4) continue;
+
+                const w = Math.exp(-d2 / rr);
+                const id = this.IX(i, j);
+                this.u[id] += fx * w;
+                this.v[id] += fy * w;
+            }
+        }
+    }
+
+    addDyeSplat(cx, cy, amount, radius = this.parameters.splatRadius) {
+        const r = Math.ceil(radius * 2);
+        const rr = radius * radius;
+
+        const minX = Math.max(1, Math.floor(cx - r));
+        const maxX = Math.min(this.xPoints, Math.ceil(cx + r));
+        const minY = Math.max(1, Math.floor(cy - r));
+        const maxY = Math.min(this.yPoints, Math.ceil(cy + r));
+
+        for (let j = minY; j <= maxY; j++) {
+            for (let i = minX; i <= maxX; i++) {
+                const dx = i - cx;
+                const dy = j - cy;
+                const d2 = dx * dx + dy * dy;
+                if (d2 > rr * 4) continue;
+
+                const w = Math.exp(-d2 / rr);
+                const id = this.IX(i, j);
+                this.d[id] += amount * w;
+            }
+        }
+    }
+
+    splatSegment(x0, y0, x1, y1, fx, fy, amount) {
+        const dist = Math.hypot(x1 - x0, y1 - y0);
+        const radius = this.parameters.splatRadius; // FIX
+        const steps = Math.max(1, Math.ceil(dist / Math.max(1.0, radius * 0.35)));
+
+        for (let s = 0; s <= steps; s++) {
+            const t = steps === 0 ? 0 : s / steps;
+            const x = x0 + (x1 - x0) * t;
+            const y = y0 + (y1 - y0) * t;
+
+            this.addVelocitySplat(x, y, fx, fy, radius);
+            this.addDyeSplat(x, y, amount, radius * 1.25);
+        }
+
+        this.setBoundaryVelocityOpen(this.u, this.v);
+        this.setBoundaryScalarOpen(this.d);
+    }
+}
