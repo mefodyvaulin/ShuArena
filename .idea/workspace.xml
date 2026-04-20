@@ -5,19 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9b303e9c-56d7-4f96-a01f-b3b7d56a0810" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/assets/threeBody-logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulations/threeBody/index-threeBody.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/simulations/threeBody/styles-threeBody.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ThreeBodyProblem/displaying.js" beforeDir="false" afterPath="$PROJECT_DIR$/simulations/threeBody/displaying.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ThreeBodyProblem/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ThreeBodyProblem/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/simulations/threeBody/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ThreeBodyProblem/styles.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ThreeBodyProblem/threeBodyProblem.js" beforeDir="false" afterPath="$PROJECT_DIR$/simulations/threeBody/threeBodyProblem.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ThreeBodyProblem/ui.js" beforeDir="false" afterPath="$PROJECT_DIR$/simulations/threeBody/ui.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main-page/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/main-page/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/simulations/simulation.css" beforeDir="false" afterPath="$PROJECT_DIR$/simulations/simulation.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simulations/wave/script.js" beforeDir="false" afterPath="$PROJECT_DIR$/simulations/wave/script.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulations/simulation.html" beforeDir="false" afterPath="$PROJECT_DIR$/simulations/simulation.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/simulations/threeBody/index-threeBody.html" beforeDir="false" afterPath="$PROJECT_DIR$/simulations/threeBody/index-threeBody.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
