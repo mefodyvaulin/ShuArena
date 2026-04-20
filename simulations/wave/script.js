@@ -18,12 +18,10 @@ document.addEventListener('mouseup', waveSimulator.mouseUpHandler);
 let startResetButton = document.getElementById('start-reset');
 const resetSimulation = () => {
     startResetButton.textContent = 'Start'
-    startResetButton.classList.remove('active');
     waveSimulator.stopWave();
 }
 const startSimulation = () => {
     startResetButton.textContent = 'Stop'
-    startResetButton.classList.add('active');
     waveSimulator.startWave();
 }
 startResetButton.addEventListener('click', (e) => {
