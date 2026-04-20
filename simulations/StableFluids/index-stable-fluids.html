@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Wave</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="../simulation.css">
+    <link rel="stylesheet" href="stable-fluids-style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Turret+Road:wght@200;300;400;500;700;800&display=swap" rel="stylesheet">
+    <script src="../simulation.js"></script>
+    <script type="module" src="app.js"></script>
+</head>
+<body>
+<header id = "simulation-header">
+    <a class = "main-page-link" href = "../../main-page/index.html">
+        <img src = "../../assets/logo.png" alt = "Логотип ШУ арены" class = "logo">
+    </a>
+    <h1 class = "simulation-title">
+        Stable Fluids
+    </h1>
+    <button class = "simulation-settings-button" onclick = "onClickSimulationSettingsButton()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+</header>
+
+<div class="simulation-wrapper">
+    <div class = "container" id = "simulation-content">
+        <canvas id="view"></canvas>
+    </div>
+
+    <aside class = "simulation-settings-panel container">
+        <div class="info-box">
+            <p>Пока пусто :(</p>
+        </div>
+    </aside>
+</div>
+</body>
+</html>
