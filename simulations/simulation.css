@@ -88,9 +88,6 @@
     outline: none;
     box-sizing: border-box;
 }
-.field input[type="checkbox"], .field select {
-    transform: scale(1.5);
-}
 
 .selector{
     margin-bottom: 10px;
