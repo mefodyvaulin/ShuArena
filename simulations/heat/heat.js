@@ -25,9 +25,10 @@ window.onload = function() {
     canvas.onmousemove = function(e) {
         if (!isDrawing) return;
         const rect = canvas.getBoundingClientRect();
-        const scale = N / rect.width;
-        const x = Math.floor((e.clientX - rect.left) * scale);
-        const y = Math.floor((e.clientY - rect.top) * scale);
+        const scaleX = N / rect.width;
+        const scaleY = N / rect.height;
+        const x = Math.floor((e.clientX - rect.left) * scaleX);
+        const y = Math.floor((e.clientY - rect.top) * scaleY);
         const brushRadius = 5;
         for (let dy = -brushRadius; dy <= brushRadius; dy++) {
             for (let dx = -brushRadius; dx <= brushRadius; dx++) {
@@ -52,7 +53,7 @@ window.onload = function() {
         for (let i = 0; i < N; i++) {
             for (let j = 0; j < N; j++) u[i][j] = 0;
         }
-        u[N / 2][N / 2] = 1000;
+        u[N / 2][N / 2] = 500000;
     };
     requestAnimationFrame(loop);
 };
@@ -65,8 +66,8 @@ function loop() {
 
 function updatePhysics() {
     const a = parseFloat(document.getElementById('paramA').value) || 1.0;
-    const dt = (H * H) / (4 * a) * 0.8;
-    const lambda = (a * dt) / (H * H);
+    const dt = 0.02;
+    let lambda = (a * dt) / (H * H);
     for (let i = 1; i < N - 1; i++) {
         for (let j = 1; j < N - 1; j++) {
             const diffX = u[i + 1][j] - 2 * u[i][j] + u[i - 1][j];
