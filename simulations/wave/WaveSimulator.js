@@ -56,15 +56,6 @@ class WaveSimulator{
     mouseUpHandler = () =>{
         this.isDrawing = false;
     }
-
-    startButtonHandler = () => {
-        if (this.isRunning) {
-            this.stopWave();
-        }
-        else {
-            this.startWave();
-        }
-    }
 }
 
 export default WaveSimulator;
