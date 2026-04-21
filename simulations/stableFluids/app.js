@@ -155,7 +155,7 @@ viscositySlider.addEventListener('blur', clampViscosityValue);
 
 function applyParametersToSolver() {
     solver.parameters.vorticity = parseFloat(vorticitySlider.value);
-    solver.parameters.viscosity = parseFloat(viscositySlider.value);
+    solver.parameters.viscosity = parseFloat(viscositySlider.value) + 1e-5; // little bit more than 0 for more stability
 }
 
 vorticitySlider.addEventListener('input', () => {
