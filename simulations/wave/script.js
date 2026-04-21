@@ -49,7 +49,12 @@ document.getElementById('curveForm').addEventListener('change', (e) =>{
 });
 
 document.getElementById('startSpeed').addEventListener('change', (e) =>{
+    if (e.target.value > 10)
+        e.target.value = 10;
+    else if (e.target.value < -10){
+        e.target.value = -10;
+    }
     resetSimulation();
-    startSpeed = +e.target.value;
+    startSpeed = e.target.value;
     init();
 });

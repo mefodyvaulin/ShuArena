@@ -1,5 +1,6 @@
 const N = 600;
 const H = 1.0;
+let a = 1;
 let u = [];
 let nextU = [];
 for (let i = 0; i < N; i++) {
@@ -55,6 +56,15 @@ window.onload = function() {
         }
         u[N / 2][N / 2] = 500000;
     };
+
+    document.getElementById('paramA').addEventListener('change', function() {
+        if (this.value > 10)
+            this.value = 10;
+        else if (this.value < 0.1){
+            this.value = 0.1;
+        }
+        a = this.value;
+    })
     requestAnimationFrame(loop);
 };
 
@@ -65,7 +75,6 @@ function loop() {
 }
 
 function updatePhysics() {
-    const a = parseFloat(document.getElementById('paramA').value) || 1.0;
     const dt = 0.02;
     let lambda = (a * dt) / (H * H);
     for (let i = 1; i < N - 1; i++) {
