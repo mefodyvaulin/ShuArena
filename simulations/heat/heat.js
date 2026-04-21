@@ -58,8 +58,8 @@ window.onload = function() {
     };
 
     document.getElementById('paramA').addEventListener('change', function() {
-        if (this.value > 10)
-            this.value = 10;
+        if (this.value > 100)
+            this.value = 100;
         else if (this.value < 0.1){
             this.value = 0.1;
         }
@@ -75,7 +75,7 @@ function loop() {
 }
 
 function updatePhysics() {
-    const dt = 0.02;
+    const dt = 0.002;
     let lambda = (a * dt) / (H * H);
     for (let i = 1; i < N - 1; i++) {
         for (let j = 1; j < N - 1; j++) {
