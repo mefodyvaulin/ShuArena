@@ -9,6 +9,12 @@ const simCtx = simCanvas.getContext('2d');
 const width = 300
 const aspect = 9 / 16
 
+const vorticitySlider = document.getElementById('vorticity-slider');
+const vorticitySpan = document.getElementById('vorticity-value');
+const viscositySlider = document.getElementById('viscosity-slider');
+const viscositySpan = document.getElementById('viscosity-value');
+const resetButton = document.getElementById('reset-button');
+
 const solver = new StableFluidsSolver({
     width: width,
     height: Math.floor(width * aspect),
@@ -119,3 +125,56 @@ function loop() {
 }
 
 loop();
+
+function updateVorticityDisplay() {
+    const val = parseFloat(vorticitySlider.value).toFixed(2);
+    vorticitySpan.textContent = val;
+}
+
+function updateViscosityDisplay() {
+    const val = parseFloat(viscositySlider.value).toFixed(5);
+    viscositySpan.textContent = val;
+}
+
+function clampViscosityValue() {
+    let value = parseFloat(viscositySlider.value);
+
+    if (isNaN(value)) {
+        value = 0;
+    }
+
+    value = Math.min(2.0, Math.max(0, value));
+    viscositySlider.value = value.toFixed(5);
+
+    updateViscosityDisplay();
+    applyParametersToSolver();
+}
+
+viscositySlider.addEventListener('input', clampViscosityValue);
+viscositySlider.addEventListener('blur', clampViscosityValue);
+
+function applyParametersToSolver() {
+    solver.parameters.vorticity = parseFloat(vorticitySlider.value);
+    solver.parameters.viscosity = parseFloat(viscositySlider.value);
+}
+
+vorticitySlider.addEventListener('input', () => {
+    updateVorticityDisplay();
+    applyParametersToSolver();
+});
+
+viscositySlider.addEventListener('input', () => {
+    updateViscosityDisplay();
+    applyParametersToSolver();
+});
+
+function resetSimulation() {
+    applyParametersToSolver();
+    solver.fillZeros();
+}
+
+resetButton.addEventListener('click', resetSimulation);
+
+updateVorticityDisplay();
+updateViscosityDisplay();
+applyParametersToSolver();
