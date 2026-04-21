@@ -132,8 +132,8 @@ function updateVorticityDisplay() {
 }
 
 function updateViscosityDisplay() {
-    const val = parseFloat(viscositySlider.value).toFixed(5);
-    viscositySpan.textContent = val;
+    const val = parseFloat(viscositySlider.value).toFixed(2);
+    //viscositySpan.textContent = val;
 }
 
 function clampViscosityValue() {
@@ -144,7 +144,7 @@ function clampViscosityValue() {
     }
 
     value = Math.min(2.0, Math.max(0, value));
-    viscositySlider.value = value.toFixed(5);
+    viscositySlider.value = value.toFixed(2);
 
     updateViscosityDisplay();
     applyParametersToSolver();
