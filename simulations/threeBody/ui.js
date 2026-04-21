@@ -36,8 +36,7 @@ export default function initUI(config, bodies) {
     bindFloatInput('#input-timeSpeed', val => config.timeSpeed = val);
 
     const bodyNames = ['first', 'second', 'third'];
-    bodies.forEach((body, index) => {
-        const name = bodyNames[index];
+    bodyNames.forEach((name, index) => {
         bindFloatInput(`#input-${name}BodyMass`, val => config.bodies[index].mass = val);
         bindFloatInput(`#input-${name}BodyPositionX`, val => config.bodies[index].position.x = val);
         bindFloatInput(`#input-${name}BodyPositionY`, val => config.bodies[index].position.y = val);
@@ -54,13 +53,23 @@ export default function initUI(config, bodies) {
             document.querySelector('#pause-continue-button').textContent = "Пауза";
         }
     });
+
     bindClick('#reset-button', () => {
-        for (let i = 0; i < config.bodies.length; i++) {
-            config.bodies[i].position = {...bodies[i].position };
-            config.bodies[i].velocity = {...bodies[i].velocity };
-            config.bodies[i].mass = bodies[i].mass;
-        }
-        syncUi();
+        config.bodies.forEach((body, index) => {
+            const name = bodyNames[index];
+
+            const mass = parseFloat(document.querySelector(`#input-${name}BodyMass`).value);
+            const positionX = parseFloat(document.querySelector(`#input-${name}BodyPositionX`).value);
+            const positionY = parseFloat(document.querySelector(`#input-${name}BodyPositionY`).value);
+            const velocityX = parseFloat(document.querySelector(`#input-${name}BodyVelocityX`).value);
+            const velocityY = parseFloat(document.querySelector(`#input-${name}BodyVelocityY`).value);
+
+            body.mass = isNaN(mass) ? body.mass : mass;
+            body.position.x = isNaN(positionX) ? body.position.x : positionX;
+            body.position.y = isNaN(positionY) ? body.position.y : positionY;
+            body.velocity.x = isNaN(velocityX) ? body.velocity.x : velocityX;
+            body.velocity.y = isNaN(velocityY) ? body.velocity.y : velocityY;
+        })
     });
 
     document.querySelector('#field-borders').addEventListener('change', (e) => {
