@@ -23,7 +23,7 @@ const bodies = [
     { number: 3, color: 'rgb(0, 0, 255)', mass: 1, position: {x: 0, y: 0}, velocity: {x: -0.93240737, y: -0.86473146 } }
 ];
 
-const config = {
+const startConfig = {
     bodies: structuredClone(bodies),
     G: 1,
     dt: 0.001,
@@ -32,7 +32,9 @@ const config = {
     fieldBorders: false
 }
 
-initUI(config, bodies);
+const config = structuredClone(startConfig);
+
+initUI(config, startConfig);
 
 const scale = 100;
 const radius = 10;

@@ -1,4 +1,4 @@
-export default function initUI(config, bodies) {
+export default function initUI(config, startConfig) {
     const bindFloatInput = (selector, func) => {
         const element = document.querySelector(selector);
         if (!element) return;
@@ -16,13 +16,14 @@ export default function initUI(config, bodies) {
         if (element) element.addEventListener('click', action);
     };
 
+    const bodyNames = ['first', 'second', 'third'];
+
     const syncUi = () => {
         document.querySelector('#input-g').value = config.G;
         document.querySelector('#input-dt').value = config.dt;
         document.querySelector('#input-timeSpeed').value = config.timeSpeed;
 
-        bodies.forEach((body, index) => {
-            const name = bodyNames[index];
+        bodyNames.forEach((name, index) => {
             document.querySelector(`#input-${name}BodyMass`).value = config.bodies[index].mass;
             document.querySelector(`#input-${name}BodyPositionX`).value = config.bodies[index].position.x;
             document.querySelector(`#input-${name}BodyPositionY`).value = config.bodies[index].position.y;
@@ -35,7 +36,6 @@ export default function initUI(config, bodies) {
     bindFloatInput('#input-dt', val => config.dt = val);
     bindFloatInput('#input-timeSpeed', val => config.timeSpeed = val);
 
-    const bodyNames = ['first', 'second', 'third'];
     bodyNames.forEach((name, index) => {
         bindFloatInput(`#input-${name}BodyMass`, val => config.bodies[index].mass = val);
         bindFloatInput(`#input-${name}BodyPositionX`, val => config.bodies[index].position.x = val);
@@ -54,6 +54,22 @@ export default function initUI(config, bodies) {
         }
     });
 
+    bindClick('#reset-config-button', () => {
+        config.bodies.forEach((body, index) => {
+            body.mass = startConfig.bodies[index].mass;
+            body.position.x = startConfig.bodies[index].position.x;
+            body.position.y = startConfig.bodies[index].position.y;
+            body.velocity.x = startConfig.bodies[index].velocity.x;
+            body.velocity.y = startConfig.bodies[index].velocity.y;
+        });
+        config.G = startConfig.G;
+        config.dt = startConfig.dt;
+        config.timeSpeed = startConfig.timeSpeed;
+        config.fieldBorders = startConfig.fieldBorders;
+
+        syncUi();
+    });
+
     bindClick('#reset-button', () => {
         config.bodies.forEach((body, index) => {
             const name = bodyNames[index];
@@ -69,7 +85,7 @@ export default function initUI(config, bodies) {
             body.position.y = isNaN(positionY) ? body.position.y : positionY;
             body.velocity.x = isNaN(velocityX) ? body.velocity.x : velocityX;
             body.velocity.y = isNaN(velocityY) ? body.velocity.y : velocityY;
-        })
+        });
     });
 
     document.querySelector('#field-borders').addEventListener('change', (e) => {
