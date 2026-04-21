@@ -6,8 +6,8 @@ const ctx = canvas.getContext('2d', { alpha: false });
 const simCanvas = document.createElement('canvas');
 const simCtx = simCanvas.getContext('2d');
 
-const width = 300
-const aspect = 9 / 16
+const width = 300;
+const aspect = 9 / 16;
 
 const vorticitySlider = document.getElementById('vorticity-slider');
 const vorticitySpan = document.getElementById('vorticity-value');
@@ -83,6 +83,7 @@ canvas.addEventListener('pointermove', (e) => {
 function stop() {
     pointer.down = false;
 }
+
 canvas.addEventListener('pointerup', stop);
 canvas.addEventListener('pointercancel', stop);
 canvas.addEventListener('pointerleave', stop);
@@ -132,14 +133,33 @@ function updateVorticityDisplay() {
 }
 
 function updateViscosityDisplay() {
-    const val = parseFloat(viscositySlider.value).toFixed(2);
-    //viscositySpan.textContent = val;
+    const raw = viscositySlider.value;
+
+    if (raw === '') {
+        viscositySpan.textContent = '';
+        return;
+    }
+
+    const val = parseFloat(raw);
+    //viscositySpan.textContent = Number.isNaN(val) ? '' : val.toFixed(2);
 }
 
-function clampViscosityValue() {
+function applyParametersToSolver() {
+    const vorticity = parseFloat(vorticitySlider.value);
+    solver.parameters.vorticity = Number.isNaN(vorticity) ? 0 : vorticity;
+
+    const rawViscosity = viscositySlider.value;
+    const viscosity = rawViscosity === '' ? 0 : parseFloat(rawViscosity);
+
+    if (!Number.isNaN(viscosity)) {
+        solver.parameters.viscosity = Math.min(2.0, Math.max(0, viscosity)) + 1e-5;
+    }
+}
+
+function commitViscosityValue() {
     let value = parseFloat(viscositySlider.value);
 
-    if (isNaN(value)) {
+    if (Number.isNaN(value)) {
         value = 0;
     }
 
@@ -150,21 +170,16 @@ function clampViscosityValue() {
     applyParametersToSolver();
 }
 
-viscositySlider.addEventListener('input', clampViscosityValue);
-viscositySlider.addEventListener('blur', clampViscosityValue);
-
-function applyParametersToSolver() {
-    solver.parameters.vorticity = parseFloat(vorticitySlider.value);
-    solver.parameters.viscosity = parseFloat(viscositySlider.value) + 1e-5; // little bit more than 0 for more stability
-}
-
-vorticitySlider.addEventListener('input', () => {
-    updateVorticityDisplay();
+viscositySlider.addEventListener('input', () => {
+    updateViscosityDisplay();
     applyParametersToSolver();
 });
 
-viscositySlider.addEventListener('input', () => {
-    updateViscosityDisplay();
+viscositySlider.addEventListener('blur', commitViscosityValue);
+viscositySlider.addEventListener('change', commitViscosityValue);
+
+vorticitySlider.addEventListener('input', () => {
+    updateVorticityDisplay();
     applyParametersToSolver();
 });
 
