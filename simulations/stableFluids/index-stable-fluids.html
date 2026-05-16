@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="../simulation.css">
     <link rel="stylesheet" href="stable-fluids-style.css">
     <link href="https://fonts.googleapis.com/css2?family=Turret+Road:wght@200;300;400;500;700;800&display=swap" rel="stylesheet">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
     <script src="../simulation.js"></script>
     <script type="module" src="app.js"></script>
 </head>
@@ -31,6 +40,10 @@
     </div>
 
     <aside class = "simulation-settings-panel container">
+        <div class="help-button-wrap">
+            <button id="help-button" type="button" class="help-button" title="Описание симуляции">?</button>
+        </div>
+
         <div class="field">
             <label for="vorticity-slider">Завихренность: <span id="vorticity-value">0.0</span></label>
             <input type="range" id="vorticity-slider" min="0" max="20" value="0" step="0.1">
@@ -47,6 +60,210 @@
             </div>
         </div>
     </aside>
+</div>
+<div id="help-overlay" class="help-overlay" aria-hidden="true">
+    <div class="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title">
+        <button id="help-close" class="help-close" type="button" aria-label="Закрыть">×</button>
+
+        <div class="help-content">
+            <h2 id="help-title">Stable Fluids</h2>
+
+            <div>
+                Это 2D-симуляция несжимаемой жидкости на сетке, основанная на уравнениях Навье–Стокса
+                и реализованная по методу <a href="https://www.researchgate.net/publication/2560062_Real-Time_Fluid_Dynamics_for_Games" target="_blank" rel="noopener noreferrer">
+                Real-Time Fluid Dynamics for Games
+            </a>.
+            </div>
+
+            <div><b>Основные поля:</b></div>
+            <ul>
+                <li>\(\mathbf{u}=(u,v)\) — поле скорости</li>
+                <li>\(p\) — давление</li>
+                <li>\(d\) — поле красителя</li>
+                <li>\(\omega\) — вихрь</li>
+            </ul>
+
+            <h3>Основные уравнения</h3>
+
+            <div><b>1. Уравнение движения жидкости (уравнение Навье-Стокса)</b></div>
+            <div class="math-block">
+                \[
+                \frac{\partial \mathbf{u}}{\partial t}
+                + (\mathbf{u}\cdot\nabla)\mathbf{u}
+                = -\nabla p + \nu \Delta \mathbf{u} + \mathbf{f}
+                \]
+            </div>
+
+            <div><b>Что означает:</b></div>
+            <ul>
+                <li>\((\mathbf{u}\cdot\nabla)\mathbf{u}\) — перенос скорости потоком (адвекция)</li>
+                <li>\(-\nabla p\) — влияние давления</li>
+                <li>\(\nu \Delta \mathbf{u}\) — вязкая диффузия скорости</li>
+                <li>\(\mathbf{f}\) — внешние силы, включая добавление импульса и вихревую силу</li>
+            </ul>
+
+            <div><b>2. Условие несжимаемости (уравнение неразрывности при константной плотности жидкости)</b></div>
+            <div class="math-block">
+                \[
+                \nabla \cdot \mathbf{u} = 0
+                \]
+            </div>
+
+            <div>
+                Это означает, что жидкость не сжимается и не расширяется.
+                Для этого после каждого шага вычисляется давление и скорость корректируется.
+            </div>
+
+            <div><b>3. Уравнение для давления</b></div>
+            <div class="math-block">
+                \[
+                \Delta p = \nabla \cdot \mathbf{u}
+                \]
+            </div>
+
+            <div>После решения этого уравнения скорость исправляется:</div>
+            <div class="math-block">
+                \[
+                \mathbf{u} \leftarrow \mathbf{u} - \nabla p
+                \]
+            </div>
+
+            <div>
+                Это делает поле скорости дивергентно-свободным.
+            </div>
+
+            <div><b>4. Уравнение для красителя</b></div>
+            <div class="math-block">
+                \[
+                \frac{\partial d}{\partial t} + (\mathbf{u}\cdot\nabla)d = \kappa \Delta d
+                \]
+            </div>
+
+            <div><b>То есть краситель:</b></div>
+            <ul>
+                <li>переносится потоком</li>
+                <li>может немного диффундировать</li>
+                <li>затем затухает через коэффициент диссипации</li>
+            </ul>
+
+            <div><b>5. Вихревой член</b></div>
+            <div>Сначала вычисляется скалярный вихрь:</div>
+            <div class="math-block">
+                \[
+                \omega = \frac{\partial v}{\partial x} - \frac{\partial u}{\partial y}
+                \]
+            </div>
+
+            <div>Затем добавляется вихревая сила, которая усиливает мелкие завихрения:</div>
+            <div class="math-block">
+                \[
+                \mathbf{f}_{vort} = \varepsilon \, \mathbf{N} \times \omega
+                \]
+            </div>
+
+            <div>
+                где
+            </div>
+            <div class="math-block">
+                \[
+                \mathbf{N} = \frac{\nabla |\omega|}{\left|\nabla |\omega|\right|}
+                \]
+            </div>
+
+            <h3>Численная схема</h3>
+
+            <div>
+                Симуляция считается на регулярной 2D-сетке с конечными разностями.
+            </div>
+
+            <div>Производные считаются примерно так:</div>
+            <div class="math-block">
+                \[
+                \frac{\partial u}{\partial x} \approx \frac{u_{i+1,j} - u_{i-1,j}}{2},
+                \qquad
+                \frac{\partial v}{\partial y} \approx \frac{v_{i,j+1} - v_{i,j-1}}{2}
+                \]
+            </div>
+
+            <h3>Краткий алгоритм одного шага</h3>
+
+            <ol>
+                <li>
+                    <b>Добавление вихревой силы</b><br>
+                    Сначала вычисляется вихрь \(\omega\), затем к скорости добавляется \(\mathbf{f}_{vort}\),
+                    чтобы поток выглядел более “живым” и закрученным.
+                </li>
+                <li>
+                    <b>Диффузия скорости</b><br>
+                    Решается уравнение:
+                    <div class="math-block">
+                        \[
+                        (I - \nu \Delta t \Delta)\mathbf{u}^* = \mathbf{u}^n
+                        \]
+                    </div>
+                    Это делается итерационно методом Гаусса–Зейделя.
+                </li>
+                <li>
+                    <b>Проекция на несжимаемое поле</b><br>
+                    Вычисляется дивергенция скорости, решается уравнение Пуассона для давления,
+                    после чего скорость корректируется:
+                    <div class="math-block">
+                        \[
+                        \mathbf{u} \leftarrow \mathbf{u} - \nabla p
+                        \]
+                    </div>
+                </li>
+                <li>
+                    <b>Перенос скорости</b><br>
+                    Используется полулагранжев метод:
+                    <div class="math-block">
+                        \[
+                        \mathbf{u}^{n+1}(x) = \mathbf{u}^n(x - \Delta t\,\mathbf{u}(x))
+                        \]
+                    </div>
+                    Значение берётся из “предыдущей” точки вдоль траектории частиц.
+                    Для этого применяется билинейная интерполяция.
+                </li>
+                <li>
+                    <b>Повторная проекция</b><br>
+                    Ещё раз корректируется скорость в соответствии с уравнением несжимаемости.
+                </li>
+                <li>
+                    <b>Диффузия красителя</b><br>
+                    Краситель слегка размазывается по сетке.
+                    <div class="math-block">
+                        \[
+                        (I - \nu \Delta t \Delta)\mathbf{d}^* = \mathbf{d}^n
+                        \]
+                    </div>
+                </li>
+                <li>
+                    <b>Перенос красителя потоком</b><br>
+                    <div class="math-block">
+                        \[
+                        d^{n+1}(x) = d^n(x - \Delta t\,\mathbf{u}(x))
+                        \]
+                    </div>
+                    Также с билинейной интерполяцией и затуханием.
+                </li>
+            </ol>
+
+            <h3>Добавление краситиеля \(d\)</h3>
+
+            <div>
+                Пользователь по клику лкм добавляет локально:
+            </div>
+
+            <ul>
+                <li>импульс в поле скорости</li>
+                <li>краситель в поле плотности/цвета</li>
+            </ul>
+
+            <div>
+                Это имитирует, например, струю дыма/чернил.
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>
