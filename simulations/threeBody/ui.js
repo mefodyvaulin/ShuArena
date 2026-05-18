@@ -22,6 +22,7 @@ export default function initUI(config, startConfig) {
         document.querySelector('#input-g').value = config.G;
         document.querySelector('#input-dt').value = config.dt;
         document.querySelector('#input-timeSpeed').value = config.timeSpeed;
+        document.querySelector('#trail-length').value = config.trailLength;
 
         bodyNames.forEach((name, index) => {
             document.querySelector(`#input-${name}BodyMass`).value = config.bodies[index].mass;
@@ -90,6 +91,16 @@ export default function initUI(config, startConfig) {
 
     document.querySelector('#field-borders').addEventListener('change', (e) => {
         config.fieldBorders = e.target.checked;
+    });
+
+    document.querySelector('#trail-length').addEventListener('input', (e) => {
+        config.trailLength = parseInt(e.target.value)
+
+        config.bodies.forEach(body => {
+            if (body.displaying) {
+                body.displaying.trailLength = config.trailLength;
+            }
+        })
     });
 
     syncUi();
