@@ -9,6 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Turret+Road:wght@200;300;400;500;700;800&display=swap" rel="stylesheet">
     <script src="../simulation.js"></script>
     <script type="module" src="script.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script src="/simulations/help-modal.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" defer></script>
 </head>
 <body>
 <header id = "simulation-header">
@@ -31,7 +41,9 @@
     </div>
 
     <aside class = "simulation-settings-panel container">
-
+        <div class="help-button-wrap">
+            <button id="help-button" type="button" class="help-button" title="Описание симуляции">?</button>
+        </div>
         <div class = "field">
             <label for = "startSpeed">Начальная скорость</label>
             <input type="number" id = "startSpeed" min="-10" max="10" step="1" value="0">
@@ -57,6 +69,99 @@
         </div>
 
     </aside>
+</div>
+<div id="help-overlay" class="help-overlay" aria-hidden="true">
+    <div class="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-title">
+        <button id="help-close" class="help-close" type="button" aria-label="Закрыть">×</button>
+
+        <div class="help-content">
+            <h2 id="help-title">Волновое уравнение на струне</h2>
+
+            <div>
+                Это 1D-симуляция поперечных колебаний закреплённой струны,
+                реализованная по явной конечно-разностной схеме («крест»).
+            </div>
+
+            <div><b>Основные параметры:</b></div>
+            <ul>
+                <li>\(u(x,t)\) — смещение струны</li>
+                <li>\(c\) — скорость волны (задаётся неявно через \(\Delta x\) и \(\Delta t\))</li>
+                <li>\(f(x)\) — начальная форма</li>
+                <li>\(g(x)\) — начальная скорость</li>
+            </ul>
+
+            <h3>Уравнение и граничные условия</h3>
+            <div class="math-block">
+                \[
+                \frac{\partial^2 u}{\partial t^2} = c^2 \frac{\partial^2 u}{\partial x^2},\quad 0 \lt x \lt L,\quad t \gt 0
+                \]
+            </div>
+            <div class="math-block">
+                \[
+                u(0,t)=0,\quad u(L,t)=0,\quad u(x,0)=f(x),\quad u_t(x,0)=g(x)
+                \]
+            </div>
+
+            <h3>Численная схема</h3>
+            <div>Сетка: \(x_i=i\Delta x,\; t^n=n\Delta t\). Обозначение \(u_i^n\approx u(x_i,t^n)\).</div>
+            <div class="math-block">
+                \[
+                u_i^{n+1}=2u_i^n-u_i^{n-1}+r^2\bigl(u_{i+1}^n-2u_i^n+u_{i-1}^n\bigr),\quad
+                r=\frac{c\Delta t}{\Delta x}
+                \]
+            </div>
+
+            <div><b>Первый шаг (n=0 → n=1):</b></div>
+            <div class="math-block">
+                \[
+                u_i^0=f(x_i),\quad
+                u_i^1=u_i^0+\Delta t\,g(x_i)+\frac{r^2}{2}\bigl(u_{i+1}^0-2u_i^0+u_{i-1}^0\bigr)
+                \]
+            </div>
+
+            <div><b>Граничные условия на каждом шаге:</b></div>
+            <div class="math-block">
+                \[
+                u_0^{\,n}=0,\quad u_N^{\,n}=0
+                \]
+            </div>
+
+            <h3>Устойчивость (условие Куранта)</h3>
+            <div class="note">
+                \[
+                r = \frac{c\Delta t}{\Delta x} \le 1
+                \]
+                <p>При \(r>1\) схема становится неустойчивой. Рекомендуется \(0.5\le r\le0.9\).</p>
+            </div>
+
+            <h3>Алгоритм симуляции</h3>
+            <ol>
+                <li>Задать \(f(x), g(x), L, c, \Delta x, \Delta t\) (с выполнением \(r\le1\)).</li>
+                <li>Вычислить нулевой слой \(u_i^0 = f(x_i)\).</li>
+                <li>Вычислить первый слой \(u_i^1\) по формуле с \(g(x_i)\).</li>
+                <li>Для каждого следующего шага:
+                    <ul>
+                        <li>обновить внутренние точки по явной схеме;</li>
+                        <li>обнулить концы \(u_0^{n+1}=0,\; u_N^{n+1}=0\).</li>
+                    </ul>
+                </li>
+                <li>Повторять пункт 4 нужное количество раз.</li>
+            </ol>
+
+            <h3>Энергия и физика</h3>
+            <div class="math-block">
+                \[
+                E = \frac12\int_0^L \bigl(u_t^2 + c^2 u_x^2\bigr)dx
+                \]
+            </div>
+            <div>В дискретном виде при \(r\le1\) энергия сохраняется с высокой точностью. Наблюдаются бегущие волны, отражения от закреплённых концов.</div>
+
+            <footer>
+                Метод конечных разностей (явная схема "крест") для волнового уравнения.
+                Устойчивость обеспечена условием Куранта.
+            </footer>
+        </div>
+    </div>
 </div>
 </body>
 </html>

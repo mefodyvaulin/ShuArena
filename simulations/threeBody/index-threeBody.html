@@ -9,6 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Turret+Road:wght@200;300;400;500;700;800&display=swap" rel="stylesheet">
     <script src="../simulation.js"></script>
     <script type="module" src="main.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script src="/simulations/help-modal.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" defer></script>
 </head>
 <body>
 <header id="simulation-header">
@@ -31,6 +41,9 @@
     </div>
 
     <aside class = "simulation-settings-panel container">
+        <div class="help-button-wrap">
+            <button id="help-button" type="button" class="help-button" title="Описание симуляции">?</button>
+        </div>
         <div class="field">
             <label for="input-g">G</label>
             <input id="input-g" type="number" min="0.01" max="100" step="0.1">
