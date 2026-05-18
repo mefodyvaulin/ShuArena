@@ -50,15 +50,16 @@ const startConfig = {
     isPaused: false,
     timeSpeed: 1,
     fieldBorders: false,
-    trailLength: 30
+    bodiesNumbering: true,
+    trailLength: 30,
 }
 
 const radius = 10;
 
 const config = structuredClone(startConfig);
 config.bodies.forEach(body => {
-    body.displaying = new Displaying(ctx, radius, config.trailLength, body.color)
-})
+    body.displaying = new Displaying(ctx, radius, config.trailLength, body.color, body.number);
+});
 
 initUI(config, startConfig, orbits);
 

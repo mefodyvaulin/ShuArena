@@ -1,5 +1,5 @@
 export default class Displaying {
-    constructor(ctx, radius, trailLength, color) {
+    constructor(ctx, radius, trailLength, color, number) {
         this.ctx = ctx;
 
         this.radius = radius;
@@ -7,6 +7,8 @@ export default class Displaying {
         this.trailLength = trailLength;
 
         this.color = color;
+
+        this.number = number;
 
         this.positions = []
     }
@@ -60,5 +62,12 @@ export default class Displaying {
         this.ctx.fillStyle = this.color;
 
         this.ctx.fill();
+
+        if (this.number != null) {
+            this.ctx.fillStyle = 'Black';
+            this.ctx.font = 'bold 18px arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(this.number, head.x + this.radius + 2, head.y - this.radius - 4);
+        }
     }
 }

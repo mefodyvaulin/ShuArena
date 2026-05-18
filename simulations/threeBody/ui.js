@@ -22,6 +22,8 @@ export default function initUI(config, startConfig, orbits) {
         document.querySelector('#input-g').value = config.G;
         document.querySelector('#input-dt').value = config.dt;
         document.querySelector('#input-timeSpeed').value = config.timeSpeed;
+        document.querySelector('#field-borders').checked = config.fieldBorders;
+        document.querySelector('#bodies-numbering').checked = config.bodiesNumbering;
         document.querySelector('#trail-length').value = config.trailLength;
 
         bodyNames.forEach((name, index) => {
@@ -67,6 +69,14 @@ export default function initUI(config, startConfig, orbits) {
         config.dt = startConfig.dt;
         config.timeSpeed = startConfig.timeSpeed;
         config.fieldBorders = startConfig.fieldBorders;
+        config.bodiesNumbering = startConfig.bodiesNumbering;
+        config.trailLength = startConfig.trailLength;
+
+        config.bodies.forEach(body => {
+            if (body.displaying) {
+                body.displaying.number = config.bodiesNumbering ? body.number : null;
+            }
+        });
 
         syncUi();
     });
@@ -91,6 +101,16 @@ export default function initUI(config, startConfig, orbits) {
 
     document.querySelector('#field-borders').addEventListener('change', (e) => {
         config.fieldBorders = e.target.checked;
+    });
+
+    document.querySelector('#bodies-numbering').addEventListener('change', (e) => {
+        config.bodiesNumbering = e.target.checked;
+
+        config.bodies.forEach(body => {
+            if (body.displaying) {
+                body.displaying.number = config.bodiesNumbering ? body.number : null;
+            }
+        });
     });
 
     document.querySelector('#trail-length').addEventListener('input', (e) => {
