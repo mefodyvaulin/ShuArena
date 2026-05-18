@@ -17,15 +17,30 @@ window.addEventListener('resize', resizeCanvas);
 const simulationSettingsButton = document.querySelector('#simulation-settings-button');
 simulationSettingsButton.addEventListener('click', resizeCanvas);
 
+const orbits = {
+    'Восьмёрка': {
+        position: { first: {x: -0.97000436, y: 0.24308753 }, second: {x: 0.97000436, y: -0.24308753 }, third: {x: 0, y: 0 } },
+        velocity: { first: {x: 0.46620368, y: 0.43236573 }, second: {x: 0.46620368, y: 0.43236573 }, third: {x: -0.93240737, y: -0.86473146 } }
+    },
+    'Коллинеарная орбита': {
+        position: { first: {x: -1, y: 0 }, second: {x: 0, y: 0 }, third: {x: 1, y: 0 } },
+        velocity: { first: {x: 0, y: 1.11803399 }, second: {x: 0, y: 0 }, third: {x: 0, y: -1.11803399 } }
+    },
+    'Равносторонний треугольник': {
+        position: { first: {x: 1.15470054, y: 0 }, second: {x: -0.57735027, y: 1 }, third: {x: -0.57735027, y: -1 } },
+        velocity: { first: {x: 0, y: 0.70710678 }, second: {x: -0.61237244, y: -0.35355339 }, third: {x: 0.61237244, y: -0.35355339 } }
+    }
+}
 
-
+const defaultOrbit = 'Восьмёрка';
+const orbit = orbits[defaultOrbit];
 const bodies = [
     { number: 1, color: 'rgb(255, 0, 0)', mass: 1,
-        position: {x: -0.97000436, y: 0.24308753}, velocity: {x: 0.4662036850, y: 0.4323657300 } },
+        position: orbit.position.first, velocity: orbit.velocity.first },
     { number: 2, color: 'rgb(0, 255, 0)', mass: 1,
-        position: {x: 0.97000436, y: -0.24308753}, velocity: {x: 0.4662036850, y: 0.4323657300 } },
+        position: orbit.position.second, velocity: orbit.velocity.second },
     { number: 3, color: 'rgb(0, 0, 255)', mass: 1,
-        position: {x: 0, y: 0}, velocity: {x: -0.93240737, y: -0.86473146 } }
+        position: orbit.position.third, velocity: orbit.velocity.third }
 ];
 
 const startConfig = {
@@ -45,7 +60,7 @@ config.bodies.forEach(body => {
     body.displaying = new Displaying(ctx, radius, config.trailLength, body.color)
 })
 
-initUI(config, startConfig);
+initUI(config, startConfig, orbits);
 
 const scale = 100;
 const threeBodyProblem = new ThreeBodyProblem(config);

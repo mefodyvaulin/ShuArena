@@ -1,4 +1,4 @@
-export default function initUI(config, startConfig) {
+export default function initUI(config, startConfig, orbits) {
     const bindFloatInput = (selector, func) => {
         const element = document.querySelector(selector);
         if (!element) return;
@@ -102,6 +102,29 @@ export default function initUI(config, startConfig) {
             }
         })
     });
+
+    const orbitSelect = document.querySelector('#orbit-select');
+    if (orbitSelect) {
+        orbitSelect.addEventListener('change', (e) => {
+            const orbitName = e.target.value;
+            const newOrbit = orbits[orbitName];
+
+            const names = ['first', 'second', 'third'];
+            startConfig.bodies.forEach((body, index) => {
+                const key = names[index];
+                body.position = structuredClone(newOrbit.position[key]);
+                body.velocity = structuredClone(newOrbit.velocity[key]);
+            });
+
+            document.querySelector('#reset-config-button').click();
+
+            config.bodies.forEach(body => {
+                if (body.displaying) {
+                    body.displaying.positions = [];
+                }
+            });
+        });
+    }
 
     syncUi();
 }
