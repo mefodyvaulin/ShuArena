@@ -9,11 +9,9 @@ let dotsCount = 15000;
 
 const waveSimulator = new WaveSimulator();
 
-document.addEventListener('mousedown', waveSimulator.mouseDownHandler);
-
-canvas.addEventListener("mousemove", waveSimulator.mouseMoveHandler, false);
-
-document.addEventListener('mouseup', waveSimulator.mouseUpHandler);
+canvas.addEventListener('pointermove', waveSimulator.mouseMoveHandler);
+canvas.addEventListener('pointerdown', waveSimulator.mouseDownHandler);
+canvas.addEventListener('pointerup', waveSimulator.mouseUpHandler);
 
 let startResetButton = document.getElementById('start-reset');
 const resetSimulation = () => {
