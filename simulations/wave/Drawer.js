@@ -4,12 +4,20 @@
     static deltaH = 50;
     static ctx = canvas.getContext('2d');
 
-    static drawCurve(array, color = 'black') {
+    static drawCurve(array, color = null) {
         Drawer.resizeCanvas()
         const w = this.canvas.clientWidth;
         const h = this.canvas.clientHeight;
         this.ctx.clearRect(0, 0, w, h);
+
+        if (color === null) {
+            color = getComputedStyle(document.documentElement)
+                .getPropertyValue('--simulation-line-color')
+                .trim();
+        }
+
         this.ctx.fillStyle = color;
+
         for (let i = 0; i < array.length; i++) {
             const x = (i / (array.length - 1)) * w;
             const y = ((array[i] + this.deltaH) / 100) * h;

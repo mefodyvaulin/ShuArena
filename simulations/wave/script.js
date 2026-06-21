@@ -56,3 +56,15 @@ document.getElementById('startSpeed').addEventListener('change', (e) =>{
     startSpeed = e.target.value;
     init();
 });
+
+window.addEventListener('themechange', () => {
+    if (!waveSimulator.wave) {
+        return;
+    }
+
+    const points =
+        waveSimulator.wave.currentPos ??
+        waveSimulator.wave.lastPos;
+
+    Drawer.drawCurve(points);
+});

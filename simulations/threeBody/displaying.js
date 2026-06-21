@@ -64,10 +64,18 @@ export default class Displaying {
         this.ctx.fill();
 
         if (this.number != null) {
-            this.ctx.fillStyle = 'Black';
+            const numberColor = getComputedStyle(document.documentElement)
+                .getPropertyValue('--body-number-color')
+                .trim();
+
+    this.ctx.fillStyle = numberColor;
             this.ctx.font = 'bold 18px arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText(this.number, head.x + this.radius + 2, head.y - this.radius - 4);
+            this.ctx.fillText(
+                this.number,
+                head.x + this.radius + 2,
+                head.y - this.radius - 4
+            );
         }
     }
 }
