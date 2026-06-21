@@ -14,6 +14,16 @@
     background-color: var(--header-background);
 }
 
+.simulation-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#simulation-header .theme-switch {
+    position: static;
+}
+
 .simulation-wrapper{
     display: flex;
     margin: 80px 0 0 0;
@@ -45,6 +55,7 @@
     border-radius: 5px;
     border: 1px solid var(--strong-border-color);
     background-color: transparent;
+    cursor: pointer;
 }
 
 .simulation-settings-button span {

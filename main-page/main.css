@@ -1,10 +1,17 @@
-#main-header{
+#main-header {
     height: 100px;
     text-align: center;
     margin-top: 50px;
 }
 
-#main-title{
+#main-header .theme-switch {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    z-index: 1000;
+}
+
+#main-title {
     color: blue;
     font-size: 70px;
 }

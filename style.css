@@ -92,11 +92,6 @@ p{
 }
 
 .theme-switch {
-    position: absolute;
-    top: 16px;
-    right: 80px;
-    z-index: 1000;
-
     width: 45px;
     height: 45px;
     padding: 0;
